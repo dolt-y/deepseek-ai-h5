@@ -1,0 +1,41 @@
+{
+  "name": "AI-H5",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode development",
+    "prod": "vite --mode production",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "element-plus": "^2.10.4",
+    "markdown-it": "^14.1.0",
+    "markdown-it-highlightjs": "^4.2.0",
+    "recordrtc": "^5.6.2",
+    "sass": "^1.94.2",
+    "vue": "^3.5.13"
+  },
+  "keywords": [
+    "vue3",
+    "element-plus",
+    "markdown-it",
+    "recordrtc",
+    "vite",
+    "typescript"
+  ],
+  "author": "wen.yao",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^24.10.1",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "@vue/tsconfig": "^0.7.0",
+    "rollup-plugin-visualizer": "^6.0.5",
+    "terser": "^5.44.1",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.8"
+  }
+}

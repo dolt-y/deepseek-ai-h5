@@ -1,0 +1,31 @@
+{
+  "name": "ai-h5-monorepo",
+  "version": "0.1.0",
+  "description": "Monorepo for the AI H5 chat frontend (Vue 3) and backend (Express + SQLite).",
+  "author": "wen.yao",
+  "license": "MIT",
+  "private": true,
+  "keywords": [
+    "ai",
+    "chat",
+    "vue",
+    "vite",
+    "express",
+    "sqlite",
+    "monorepo"
+  ],
+  "engines": {
+    "node": ">=20.18.0"
+  },
+  "workspaces": [
+    "wechat-ai-fontend",
+    "wechat-ai-backend"
+  ],
+  "scripts": {
+    "dev:frontend": "npm --workspace wechat-ai-fontend run dev",
+    "dev:backend": "npm --workspace wechat-ai-backend run dev",
+    "dev:all": "npm run dev:backend & npm run dev:frontend",
+    "build:frontend": "npm --workspace wechat-ai-fontend run build",
+    "preview:frontend": "npm --workspace wechat-ai-fontend run preview"
+  }
+}
