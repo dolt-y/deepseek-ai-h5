@@ -31,6 +31,7 @@
     <!--输入框-->
     <div class="composer-container">
       <InputArea v-model="inputValue" :selected-model="selectedModel" :model-options="modelOptions"
+        :is-transcribing="isTranscribing"
         @send-message="handleSendMessage" @view-history="historySessionsVisible = true" @new-session="handleNewSession"
         @update:selected-model="selectedModel = $event" @settings="handleSettings"
         @stop-recording="handleStartRecording" />
@@ -39,6 +40,7 @@
     <HistroySessions :visible="historySessionsVisible" :active-session-id="sessionId"
       @close="historySessionsVisible = false" @delete-session="handelDelete" @select-session="handleSelectSession" />
     <RecordingIndicator :is-recording="isRecording" :duration="recordingDuration" :is-cancel="isCancel"
+      :is-transcribing="isTranscribing"
       @cancel="handleStopRecording">
     </RecordingIndicator>
   </div>
@@ -69,7 +71,7 @@ const {
   handleSettings,
   handelDelete
 } = useChatConversation();
-const { isRecording, recordingDuration, isCancel, handleStartRecording, handleStopRecording } = useChatRecording({
+const { isRecording, recordingDuration, isCancel, isTranscribing, handleStartRecording, handleStopRecording } = useChatRecording({
   onRecognized: (text) => {
     inputValue.value = inputValue.value ? `${inputValue.value}${text}` : text;
   }

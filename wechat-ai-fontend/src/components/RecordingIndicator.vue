@@ -9,7 +9,8 @@ export default {
     props: {
         isRecording: Boolean,
         duration: Number,
-        isCancel: Boolean
+        isCancel: Boolean,
+        isTranscribing: Boolean
     },
 
     emits: ['cancel'],
@@ -28,12 +29,18 @@ export default {
     },
 
     render() {
+        const isActive = this.isRecording || this.isTranscribing;
+        const title = this.isTranscribing ? '语音识别中...' : '正在录音...';
+        const subtitle = this.isTranscribing ? '请稍候' : this.formatDuration(this.duration);
+        const showCancel = this.isRecording;
+
         return h(
             'div',
             {
                 class: [
                     'recording-indicator',
-                    this.isRecording ? 'active' : ''
+                    isActive ? 'active' : '',
+                    this.isTranscribing ? 'transcribing' : ''
                 ]
             },
             [
@@ -45,29 +52,31 @@ export default {
                     ]),
 
                     h('div', { class: 'recording-info' }, [
-                        h('div', { class: 'recording-title' }, '正在录音...'),
+                        h('div', { class: 'recording-title' }, title),
                         h(
                             'div',
                             { class: 'recording-duration' },
-                            this.formatDuration(this.duration)
+                            subtitle
                         )
                     ]),
 
-                    h(
-                        'div',
-                        {
-                            class: [
-                                'recording-action',
-                                this.isCancel ? 'cancel' : ''
-                            ],
-                            onClick: this.handleCancel
-                        },
-                        [
-                            h('img', {
-                                src: closeIcon,
-                            })
-                        ]
-                    )
+                    showCancel
+                        ? h(
+                            'div',
+                            {
+                                class: [
+                                    'recording-action',
+                                    this.isCancel ? 'cancel' : ''
+                                ],
+                                onClick: this.handleCancel
+                            },
+                            [
+                                h('img', {
+                                    src: closeIcon,
+                                })
+                            ]
+                        )
+                        : null
                 ])
             ]
         );
@@ -93,6 +102,18 @@ export default {
     &.active {
         opacity: 1;
         pointer-events: auto;
+    }
+
+    &.transcribing {
+        .recording-icon {
+            background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+            box-shadow: 0 24px 36px rgba(249, 115, 22, 0.24);
+        }
+
+        .recording-duration {
+            color: #b45309;
+            letter-spacing: 1px;
+        }
     }
 
     .recording-content {

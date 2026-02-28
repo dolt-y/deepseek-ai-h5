@@ -180,8 +180,12 @@ export async function speechToTextController(req, res) {
       return res.status(400).json({ msg: '未提供音频文件或文件为空' });
     }
 
-    const tempFilePath = process.env.WHISPER_SAMPLE_PATH || undefined;
-    const text = await speechToText(tempFilePath);
+    const language = req.body?.lang || 'zh';
+    const text = await speechToText({
+      buffer: req.file.buffer,
+      mimetype: req.file.mimetype,
+      language
+    });
 
     return res.json({
       msg: '语音识别成功',

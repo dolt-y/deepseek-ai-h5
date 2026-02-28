@@ -18,7 +18,7 @@ import {
 } from '../repositories/messageRepository.js';
 import { handleBufferedStreamResponse } from '../utils/streamBuffer.js';
 import { AppError } from '../errors/AppError.js';
-import { transcribeSpeech } from './speechService.js';
+import { transcribeSpeech, transcribeSpeechBuffer } from './speechService.js';
 
 export async function chat({ openid, messages, model, stream, sessionId, emit }) {
   let currentSessionId = sessionId;
@@ -234,7 +234,9 @@ export async function regenerateMessage({ messageId, openid, stream, model, emit
   return { messageId, newContent: reply.content };
 }
 
-export async function speechToText(filePath) {
-  const text = await transcribeSpeech(filePath, 'zh');
-  return text;
+export async function speechToText({ buffer, mimetype, filePath, language = 'zh' } = {}) {
+  if (buffer) {
+    return transcribeSpeechBuffer(buffer, mimetype, language);
+  }
+  return transcribeSpeech(filePath, language);
 }

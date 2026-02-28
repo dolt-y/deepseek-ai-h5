@@ -53,7 +53,6 @@ npm run dev:backend
 - Swagger API 文档（`/docs`）
 
 ## 六、已知限制
-- `speech-to-text` 当前使用本地 sample 路径转写，上传音频尚未直连转写。
 - 未配置自动化测试与 CI。
 - 前后端仍需各自维护环境配置与启动方式。
 

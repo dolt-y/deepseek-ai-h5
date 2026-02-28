@@ -12,6 +12,7 @@ export function useChatRecording(options: RecordingOptions = {}) {
     const isRecording = ref(false);
     const recordingDuration = ref(0);
     const isCancel = ref(false);
+    const isTranscribing = ref(false);
 
     let recordingTimer: number | null = null;
 
@@ -61,12 +62,20 @@ export function useChatRecording(options: RecordingOptions = {}) {
         // if (isCancel.value) return "";
 
         // 上传到后端 Whisper API
-        const text = await uploadSpeech(wavBlob);
-        console.log("识别文本:", text);
-        if (text) {
-            options.onRecognized?.(text);
+        try {
+            isTranscribing.value = true;
+            const text = await uploadSpeech(wavBlob);
+            console.log("识别文本:", text);
+            if (text) {
+                options.onRecognized?.(text);
+            }
+            return text;
+        } catch (error) {
+            console.error("语音识别失败:", error);
+            return "";
+        } finally {
+            isTranscribing.value = false;
         }
-        return text;
     }
 
     function handleStopRecording() {
@@ -91,6 +100,7 @@ export function useChatRecording(options: RecordingOptions = {}) {
         isRecording,
         recordingDuration,
         isCancel,
+        isTranscribing,
         handleStartRecording,
         handleStopRecording,
         stopRecording,

@@ -35,10 +35,10 @@
         </div>
         <div class="input-surface">
             <textarea class="textarea" v-model="inputContent" placeholder="组织好你的问题，让我为你补全灵感..."
-                placeholder-style="color: rgba(47,58,102,0.35)" :disabled="isRecording" @focus="onInputFocus"
+                placeholder-style="color: rgba(47,58,102,0.35)" :disabled="isRecording || isTranscribing" @focus="onInputFocus"
                 @blur="onInputBlur" maxlength="1000"></textarea>
             <div class="input-actions">
-                <div class="icon-btn" @click="toggleRecording" :class="{ active: isRecording }" title="语音输入">
+                <div class="icon-btn" @click="toggleRecording" :class="{ active: isRecording, disabled: isTranscribing }" title="语音输入">
                     <img src="../assets/mic-outline.svg" />
                 </div>
                 <div class="send-btn" v-debounce="handleSend" :class="{ disabled: !canSend }">
@@ -56,6 +56,10 @@ const props = defineProps({
         default: ''
     },
     isRecording: {
+        type: Boolean,
+        default: false
+    },
+    isTranscribing: {
         type: Boolean,
         default: false
     },
@@ -111,9 +115,9 @@ const onNewSession = () => {
 }
 
 const handleImageUpload = () => {
-    if (props.isRecording) return;
+    if (props.isRecording || props.isTranscribing) return;
 }
-const canSend = computed(() => inputContent.value.trim().length > 0 && !props.isRecording);
+const canSend = computed(() => inputContent.value.trim().length > 0 && !props.isRecording && !props.isTranscribing);
 
 function handleSend() {
     if (!canSend.value) return;
@@ -125,6 +129,7 @@ function handleSend() {
     }
 }
 function toggleRecording() {
+    if (props.isTranscribing) return;
     emit('stop-recording');
 }
 
@@ -439,6 +444,13 @@ onUnmounted(() => {
                 filter: brightness(0) invert(1);
                 opacity: 1;
             }
+        }
+
+        &.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+            box-shadow: none;
         }
 
         @keyframes recordingButtonPulse {
