@@ -10,24 +10,30 @@
 ## 二、当前仓库结构
 - `wechat-ai-fontend/`：H5 前端（Vite + Vue 3）
 - `wechat-ai-backend/`：Node.js 后端（Express + SQLite）
+- `packages/shared/`：前后端共享常量与类型（例如 API 路由）
 - `vibing-coding/`：迭代需求与发布文档规范
 - `AGENTS.md`：协作与运行说明
 
 ## 三、运行方式（Monorepo）
 根目录一次性安装依赖：
 ```bash
-npm install
+pnpm install
 ```
 
 启动前后端：
 ```bash
-npm run dev:all
+pnpm run dev:all
 ```
 
 单独启动：
 ```bash
-npm run dev:frontend
-npm run dev:backend
+pnpm run dev:frontend
+pnpm run dev:backend
+```
+
+生成前端 OpenAPI 类型与 client：
+```bash
+pnpm run gen:openapi
 ```
 
 ## 四、环境变量

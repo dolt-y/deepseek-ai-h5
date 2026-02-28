@@ -79,29 +79,35 @@
 
 ### 前置要求
 - Node.js >= 16
-- npm 或 yarn
+- pnpm
 
 ### 安装依赖
 ```bash
-npm install
+pnpm install
 ```
 
 ### 开发服务器
 ```bash
-npm run dev
+pnpm run dev
 ```
 访问 `http://localhost:5173`
 
 ### 生产构建
 ```bash
-npm run build
+pnpm run build
 ```
 
 构建输出到 `dist/` 目录
 
 ### 预览构建结果
 ```bash
-npm run preview
+pnpm run preview
+```
+
+### 生成 OpenAPI 类型
+在仓库根目录执行：
+```bash
+pnpm run gen:openapi
 ```
 
 ## 🎯 核心业务流程

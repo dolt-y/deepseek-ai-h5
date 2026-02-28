@@ -1,19 +1,21 @@
 // src/utils/api.ts
 // 所有接口列表
-const API_BASE = import.meta.env.VITE_OPENAI_BASE_URL
+import { apiBases, apiPaths } from '@ai-h5/shared';
+
+const API_BASE = import.meta.env.VITE_OPENAI_BASE_URL;
 
 export const fixedApi = {
-    getSessionList: "/api/ai/sessions",
-    chat: "/api/ai/chat",
-    recording:'/api/ai/speech-to-text',
-    h5Login: "/api/user/login/h5",
+    getSessionList: `${apiBases.ai}${apiPaths.ai.sessions}`,
+    chat: `${apiBases.ai}${apiPaths.ai.chat}`,
+    recording: `${apiBases.ai}${apiPaths.ai.speechToText}`,
+    h5Login: `${apiBases.user}${apiPaths.user.loginH5}`,
 } as const;
 
 // 动态接口，需传入参数
 export const dynamicApi = {
-    deleteSession: (id: string | number) => `/api/ai/sessions/${id}/delete`,
-    selectSession: (id: string | number) => `/api/ai/sessions/${id}/messages`,
-    like: (id: string | number) => `/api/ai/messages/${id}/like`,
+    deleteSession: (id: string | number) => `${apiBases.ai}${apiPaths.ai.deleteSession(id)}`,
+    selectSession: (id: string | number) => `${apiBases.ai}${apiPaths.ai.sessionMessages(id)}`,
+    like: (id: string | number) => `${apiBases.ai}${apiPaths.ai.messageLike(id)}`,
 } as const;
 
 type FixedKeys = keyof typeof fixedApi;

@@ -1,0 +1,4 @@
+packages:
+  - "wechat-ai-fontend"
+  - "wechat-ai-backend"
+  - "packages/*"

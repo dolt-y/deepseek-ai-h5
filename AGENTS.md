@@ -8,21 +8,22 @@ Repository layout
 
 Quick commands
 Workspace (run at repo root)
-- `npm install`
-- `npm run dev:frontend`
-- `npm run dev:backend`
-- `npm run build:frontend`
-- `npm run preview:frontend`
+- `pnpm install`
+- `pnpm run dev:frontend`
+- `pnpm run dev:backend`
+- `pnpm run build:frontend`
+- `pnpm run preview:frontend`
+- `pnpm run gen:openapi`
 
 Frontend (run in `wechat-ai-fontend`)
-- `npm install`
-- `npm run dev` (dev server)
-- `npm run build` (production build)
-- `npm run preview` (preview build)
+- `pnpm -C wechat-ai-fontend install`
+- `pnpm -C wechat-ai-fontend dev` (dev server)
+- `pnpm -C wechat-ai-fontend build` (production build)
+- `pnpm -C wechat-ai-fontend preview` (preview build)
 
 Backend (run in `wechat-ai-backend`)
-- `npm install`
-- `npm run dev` (nodemon)
+- `pnpm -C wechat-ai-backend install`
+- `pnpm -C wechat-ai-backend dev` (nodemon)
 - `node index.js` (prod)
 
 Environment configuration

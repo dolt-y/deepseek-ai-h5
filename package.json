@@ -19,13 +19,18 @@
   },
   "workspaces": [
     "wechat-ai-fontend",
-    "wechat-ai-backend"
+    "wechat-ai-backend",
+    "packages/*"
   ],
   "scripts": {
-    "dev:frontend": "npm --workspace wechat-ai-fontend run dev",
-    "dev:backend": "npm --workspace wechat-ai-backend run dev",
-    "dev:all": "npm run dev:backend & npm run dev:frontend",
-    "build:frontend": "npm --workspace wechat-ai-fontend run build",
-    "preview:frontend": "npm --workspace wechat-ai-fontend run preview"
+    "dev:frontend": "pnpm -C wechat-ai-fontend dev",
+    "dev:backend": "pnpm -C wechat-ai-backend dev",
+    "dev:all": "pnpm -C wechat-ai-backend dev & pnpm -C wechat-ai-fontend dev",
+    "build:frontend": "pnpm -C wechat-ai-fontend build",
+    "preview:frontend": "pnpm -C wechat-ai-fontend preview",
+    "gen:openapi": "node scripts/export-openapi.mjs && openapi-typescript wechat-ai-backend/docs/openapi.json -o wechat-ai-fontend/src/types/openapi.d.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.9.1"
   }
 }

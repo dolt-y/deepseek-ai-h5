@@ -451,13 +451,13 @@ OPENAI_BASE_URL=OpenAI API基础URL
 ### 8.1 安装依赖
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 8.2 启动开发服务器
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 ### 8.3 生产环境部署
