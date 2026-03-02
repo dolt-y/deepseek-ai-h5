@@ -57,7 +57,33 @@ npm run dev:backend
 - 前后端仍需各自维护环境配置与启动方式。
 
 ## 七、文档入口
-- 后端详细对齐说明：`wechat-ai-backend/REMADE.md`
-- 后端技术文档：`wechat-ai-backend/TECHNICAL_DOC.md`
+- 后端统一文档：`wechat-ai-backend/README.md`
 - 前端说明：`wechat-ai-fontend/README.md`
 - 迭代规范：`vibing-coding/README.md`
+
+## 八、whisper.cpp 本地模型编译说明
+后端语音识别依赖 `whisper.cpp` 本地可执行程序，建议在 `wechat-ai-backend` 目录下执行：
+
+```bash
+cd wechat-ai-backend
+git clone https://github.com/ggerganov/whisper.cpp.git
+cd whisper.cpp
+```
+
+下载需要的模型（如 `tiny` / `base` / `small`）：
+
+```bash
+bash ./models/download-ggml-model.sh tiny
+```
+
+使用 CMake 编译：
+
+```bash
+mkdir build
+cd build
+cmake ..
+make -j4
+```
+
+编译完成后会生成 `build/bin/whisper-cli`，模型位于 `models/ggml-*.bin`。  
+若按默认配置运行后端，无需额外设置 `WHISPER_ROOT`；如放在其他目录，请在后端 `.env` 中显式配置 `WHISPER_ROOT`。
