@@ -12,7 +12,7 @@ export const aiDocs = {};
  *         type:
  *           type: string
  *           enum: [text, image, audio]
- *           description: 消息类型（image 会进行 OCR 识别）
+ *           description: 消息类型（image 表示图片消息）
  *         role:
  *           type: string
  *           enum: [user, assistant, system]
@@ -27,10 +27,7 @@ export const aiDocs = {};
  *           description: 音频 base64（type=audio 时可用）
  *         prompt:
  *           type: string
- *           description: 图片识别后的追加提问
- *         lang:
- *           type: string
- *           description: OCR 语言（默认 chi_sim）
+ *           description: 图片消息附带的文本提问
  *     ChatRequest:
  *       type: object
  *       required:
@@ -40,9 +37,6 @@ export const aiDocs = {};
  *           type: array
  *           items:
  *             $ref: '#/components/schemas/ChatMessage'
- *         lang:
- *           type: string
- *           description: OCR 默认语言（可选）
  *         model:
  *           type: string
  *           example: deepseek-chat
@@ -204,8 +198,6 @@ export const aiDocs = {};
  *                 type: boolean
  *               sessionId:
  *                 type: integer
- *               lang:
- *                 type: string
  *     responses:
  *       200:
  *         description: 非流式模式响应

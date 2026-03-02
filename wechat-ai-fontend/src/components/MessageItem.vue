@@ -11,7 +11,7 @@
         <div v-else class="message-name">{{ userInfo.nickname }}</div>
         <text class="message-time">{{ formatTime(message.timestamp) }}</text>
       </div>
-            <div class="message-bubble" :class="{ 'image-bubble': message.type === 'image' }">
+      <div class="message-bubble" :class="{ 'image-bubble': message.type === 'image' }">
         <div v-if="message.type === 'text'" class="message-content markdown-content">
           <div v-if="message.role === 'assistant' && message.status === 'pending'" class="thinking-indicator">
             <img src="../assets/thinking-icon.svg" alt="思考中" class="thinking-icon" />
@@ -369,7 +369,7 @@ watch(() => renderedReasoningHtml.value, () => addCodeButtons());
     .message-bubble {
       background: #95ec69;
       color: #1f2d12;
-      border-radius: 20px 20px 4px 20px;
+      border-radius: 12px 12px 12px 12px;
       box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
     }
 

@@ -3,7 +3,7 @@
 ## 1. 项目定位
 - 面向 H5 / 小程序的 AI 对话后端服务
 - 提供用户鉴权、会话管理、消息存储、SSE 流式回复
-- 支持多模态输入：文本、图片（OCR）、语音（whisper.cpp 本地 ASR）
+- 支持多模态输入：文本、图片上传、语音（whisper.cpp 本地 ASR）
 
 ## 2. 技术栈
 - Node.js (ESM)
@@ -11,7 +11,6 @@
 - SQLite3
 - JWT
 - OpenAI SDK（兼容自定义 Base URL）
-- tesseract.js（OCR）
 - whisper.cpp（本地语音转文本）
 - Swagger（`/docs`、`/docs.json`）
 
@@ -55,7 +54,7 @@ wechat-ai-backend/
 ├── db.js                     # SQLite 初始化与连接
 ├── routes/                   # 路由层
 ├── controllers/              # 控制器层（入参/响应）
-├── services/                 # 业务层（聊天/OCR/ASR）
+├── services/                 # 业务层（聊天/ASR）
 ├── repositories/             # 数据访问层（SQL）
 ├── middleware/               # 鉴权/上传/whisper 适配
 ├── docs/swagger/             # OpenAPI 定义
@@ -104,7 +103,7 @@ AI 与会话（均需 JWT）：
 图片：
 1. 前端通过 `/api/ai/chat` 以 multipart 上传图片
 2. 后端将图片保存到 `uploads/chat-images/` 并写入 `chat_records.media`
-3. OCR 识别文本（可拼接用户 prompt）后作为用户内容发送给模型
+3. 图片消息携带的 `content/prompt` 作为用户文本发送给模型（当前不做 OCR）
 
 语音：
 1. 前端上传音频到 `/api/ai/speech-to-text`

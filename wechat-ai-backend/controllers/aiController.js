@@ -15,7 +15,7 @@ import { sendError } from '../utils/error.js';
 import { isAppError } from '../errors/AppError.js';
 
 export async function chatController(req, res) {
-  const { messages: rawMessages, model, stream, sessionId: clientSessionId, lang } = req.body;
+  const { messages: rawMessages, model, stream, sessionId: clientSessionId } = req.body;
   const openid = req.user.openid;
   let messages = rawMessages;
   if (typeof rawMessages === 'string') {
@@ -27,7 +27,7 @@ export async function chatController(req, res) {
   }
 
   try {
-    messages = await normalizeMessages(messages, { file: req.file, lang });
+    messages = await normalizeMessages(messages, { file: req.file });
 
     if (!messages || !Array.isArray(messages) || !messages.every(msg => msg.role && msg.content && typeof msg.content === 'string')) {
       return res.status(400).json({ msg: 'messages格式不正确' });

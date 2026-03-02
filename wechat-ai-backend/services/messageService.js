@@ -1,4 +1,3 @@
-import { recognizeImage } from './ocrService.js';
 import { AppError } from '../errors/AppError.js';
 
 export async function normalizeMessages(messages, options = {}) {
@@ -7,7 +6,6 @@ export async function normalizeMessages(messages, options = {}) {
   }
 
   const file = options.file || null;
-  const defaultLang = options.lang || 'chi_sim';
 
   const normalized = [];
 
@@ -19,16 +17,11 @@ export async function normalizeMessages(messages, options = {}) {
         throw new AppError('图片消息请使用 multipart 上传 image 文件', 400);
       }
 
-      const ocrLang = message.lang || defaultLang;
-      const ocrText = await recognizeImage(file.path, ocrLang);
-      if (!ocrText) {
-        throw new AppError('图片未识别出文字', 400);
-      }
-
       const prompt =
         message.prompt ||
         (typeof message.content === 'string' ? message.content : '');
-      const content = prompt ? `${prompt}\n\n${ocrText}` : ocrText;
+      // 仅保存图片与可选文案，不再进行 OCR。
+      const content = prompt || '用户上传了一张图片';
       const media = `/uploads/chat-images/${file.filename}`;
 
       normalized.push({

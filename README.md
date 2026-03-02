@@ -48,7 +48,7 @@ npm run dev:backend
 - 对话接口（SSE 流式回复）
 - 会话列表与历史记录
 - 消息点赞与重新生成
-- OCR 图片识别（tesseract.js）
+- 图片上传与存储（聊天消息支持图片 URL 持久化）
 - 语音识别（whisper.cpp）
 - Swagger API 文档（`/docs`）
 
