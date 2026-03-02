@@ -1,6 +1,6 @@
 import express from 'express';
 import { authMiddleware } from '../middleware/auth.js';
-import { upload } from '../middleware/upload.js';
+import { upload, uploadImage } from '../middleware/upload.js';
 import {
   chatController,
   chatMockController,
@@ -15,7 +15,7 @@ import {
 
 export const aiRouter = express.Router();
 
-aiRouter.post('/chat', authMiddleware, upload.single('image'), chatController);
+aiRouter.post('/chat', authMiddleware, uploadImage.single('image'), chatController);
 aiRouter.post('/chat-mock', authMiddleware, chatMockController);
 aiRouter.get('/sessions', authMiddleware, getSessionsController);
 aiRouter.get('/sessions/:id/messages', authMiddleware, getSessionMessagesController);

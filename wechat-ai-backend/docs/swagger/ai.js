@@ -19,12 +19,6 @@ export const aiDocs = {};
  *         content:
  *           type: string
  *           description: 消息正文（text 消息必填）
- *         imageUrl:
- *           type: string
- *           description: 图片 URL（type=image 时可用）
- *         imageBase64:
- *           type: string
- *           description: 图片 base64（type=image 时可用）
  *         audioUrl:
  *           type: string
  *           description: 音频 URL（type=audio 时可用）
@@ -105,7 +99,7 @@ export const aiDocs = {};
  *           enum: [text, image, audio]
  *         media:
  *           type: string
- *           description: 媒体内容（图片/音频的 URL 或 dataURL）
+ *           description: 媒体内容（图片/音频 URL）
  *         content:
  *           type: string
  *         reasoning_content:

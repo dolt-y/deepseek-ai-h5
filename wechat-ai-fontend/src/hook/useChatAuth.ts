@@ -9,8 +9,9 @@ const H5_LOGIN_PAYLOAD = {
   password: 'pass123',
   userInfo: {
     nickName: 'H5测试用户',
-    avatarUrl: 'https://p26-passport.byteacctimg.com/img/user-avatar/a51222aa16ff2a7bb4896370ae09ea47~90x90.awebp'
-  }
+    avatarUrl:
+      'https://p26-passport.byteacctimg.com/img/user-avatar/a51222aa16ff2a7bb4896370ae09ea47~90x90.awebp',
+  },
 };
 
 type H5LoginResponse = {
@@ -30,16 +31,14 @@ function getQueryParam(name: string) {
 }
 
 function pickLoginToken(res?: H5LoginResponse) {
-  return (
-    res?.token
-  );
+  return res?.token;
 }
 
 export function useChatAuth() {
   const userInfo = ref<user>({
     openid: '',
     nickname: '',
-    avatarUrl: ''
+    avatarUrl: '',
   });
   const token = ref<string>('');
 
@@ -62,8 +61,8 @@ export function useChatAuth() {
       }
       token.value = loginToken;
       localStorage.setItem('token', loginToken);
-      userInfo.value.nickname=H5_LOGIN_PAYLOAD.userInfo.nickName;
-      userInfo.value.avatarUrl=H5_LOGIN_PAYLOAD.userInfo.avatarUrl;
+      userInfo.value.nickname = H5_LOGIN_PAYLOAD.userInfo.nickName;
+      userInfo.value.avatarUrl = H5_LOGIN_PAYLOAD.userInfo.avatarUrl;
     } catch (error) {
       ElMessage.error('H5登录失败');
     }
@@ -87,6 +86,6 @@ export function useChatAuth() {
 
   return {
     userInfo,
-    token
+    token,
   };
 }

@@ -101,6 +101,11 @@ AI 与会话（均需 JWT）：
 3. 通过 `text/event-stream` 返回片段
 4. 流结束后持久化助手回复
 
+图片：
+1. 前端通过 `/api/ai/chat` 以 multipart 上传图片
+2. 后端将图片保存到 `uploads/chat-images/` 并写入 `chat_records.media`
+3. OCR 识别文本（可拼接用户 prompt）后作为用户内容发送给模型
+
 语音：
 1. 前端上传音频到 `/api/ai/speech-to-text`
 2. 后端写入 `temp/` 并调用 `whisper-cli`

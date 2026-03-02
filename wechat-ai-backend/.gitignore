@@ -23,3 +23,4 @@ dist
 *.sw?
 wechat-mini.db
 whisper.cpp
+uploads

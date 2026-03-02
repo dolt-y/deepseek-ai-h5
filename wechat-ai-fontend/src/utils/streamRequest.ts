@@ -3,7 +3,7 @@ interface StreamOptions {
   data: any;
   onMessage: (chunk: string) => void;
   onThinking?: (thinking: any) => void;
-  onDone?: (sessionId?: string) => void;
+  onDone?: (sessionId?: string | number) => void;
   onError?: (err: any) => void;
 }
 
@@ -18,17 +18,37 @@ export async function streamFetch({
   onError
 }: StreamOptions) {
   try {
+    const isFormData = data instanceof FormData;
     const realUrl =
-      typeof url === 'function' ? url(data?.sessionId) : url;
+      typeof url === 'function' ? url(isFormData ? undefined : data?.sessionId) : url;
     const token = getToken();
+    const headers: Record<string, string> = {
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    };
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
+
     const res = await fetch(realUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-      },
-      body: JSON.stringify(data)
+      headers,
+      body: isFormData ? data : JSON.stringify(data)
     });
+
+    if (!res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      let errorMsg = `HTTP ${res.status}: ${res.statusText}`;
+
+      if (contentType.includes('application/json')) {
+        const errorBody = await res.json().catch(() => null);
+        if (errorBody?.msg) errorMsg = errorBody.msg;
+      } else {
+        const text = await res.text().catch(() => '');
+        if (text) errorMsg = text;
+      }
+
+      throw new Error(errorMsg);
+    }
 
     if (!res.body) throw new Error('No response body');
 
@@ -59,7 +79,7 @@ export async function streamFetch({
         } else {
           onMessage(dataStr);
         }
-      } catch (e) {
+      } catch {
         onMessage(dataStr);
       }
     };

@@ -3,6 +3,7 @@ interface ChatMessage {
   role: 'assistant' | 'user';
   type: 'text' | 'image';
   content: string;
+  media?: string | null;
   reasoning_content?: string;
   status?: 'pending' | 'success' | 'done' | 'error';
   timestamp: number;
@@ -33,7 +34,11 @@ type ToastExpose = {
   clearTimer: () => void;
 };
 type HistoryMessage = {
+  id?: number;
   role: 'assistant' | 'user';
+  type?: 'text' | 'image' | 'audio';
+  media?: string | null;
+  liked?: number;
   reasoning_content?: string;
   content: string;
   created_at?: string;

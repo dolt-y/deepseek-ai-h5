@@ -31,9 +31,9 @@
     <!--输入框-->
     <div class="composer-container">
       <InputArea v-model="inputValue" :selected-model="selectedModel" :model-options="modelOptions"
-        :is-transcribing="isTranscribing"
+        :is-assistant-typing="isAssistantTyping" :is-transcribing="isTranscribing"
         @send-message="handleSendMessage" @view-history="historySessionsVisible = true" @new-session="handleNewSession"
-        @update:selected-model="selectedModel = $event" @settings="handleSettings"
+        @upload-image="handleUploadImage" @update:selected-model="selectedModel = $event"
         @stop-recording="handleStartRecording" />
     </div>
     <!--历史会话-->
@@ -60,15 +60,16 @@ const {
   inputValue,
   selectedModel,
   modelOptions,
+  isAssistantTyping,
   sessionId,
   historySessionsVisible,
   bottomAnchorId,
   handleSendMessage,
+  handleUploadImage,
   handleNewSession,
   handleSelectSession,
   handleRegenerate,
   handleLike,
-  handleSettings,
   handelDelete
 } = useChatConversation();
 const { isRecording, recordingDuration, isCancel, isTranscribing, handleStartRecording, handleStopRecording } = useChatRecording({
