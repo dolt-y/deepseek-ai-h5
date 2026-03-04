@@ -27,6 +27,7 @@
     "dev:all": "npm run dev:backend & npm run dev:frontend",
     "build:frontend": "npm --workspace wechat-ai-fontend run build",
     "build:frontend:zip": "rm -f dist.zip && cd wechat-ai-fontend && npm run build && cd dist && zip -rq ../../dist.zip .",
-    "preview:frontend": "npm --workspace wechat-ai-fontend run preview"
+    "preview:frontend": "npm --workspace wechat-ai-fontend run preview",
+    "start:backend": "cd wechat-ai-backend && NODE_ENV=production node index.js"
   }
 }

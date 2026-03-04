@@ -28,8 +28,7 @@ app.get('/docs.json', (req, res) => {
 app.use('/api/user', userRouter);
 app.use('/api/ai', aiRouter);
 
-// const host = '10.3.20.101';
-const host = 'localhost';
+const host = '0.0.0.0';
 
 app.listen(config.port, host, () => {
   console.log(`Server running at http://${host}:${config.port}`);
