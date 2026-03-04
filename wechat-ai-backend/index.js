@@ -15,7 +15,16 @@ const __dirname = path.dirname(__filename);
 const uploadDir = path.resolve(__dirname, 'uploads');
 
 const app = express();
-app.use(cors());
+const envName = process.env.NODE_ENV || 'development';
+if (envName === 'development') {
+  const corsOrigin = process.env.CORS_ORIGIN || '*';
+  if (corsOrigin === '*') {
+    app.use(cors());
+  } else {
+    const origins = corsOrigin.split(',').map((item) => item.trim()).filter(Boolean);
+    app.use(cors({ origin: origins }));
+  }
+}
 app.use(bodyParser.json());
 app.use('/uploads', express.static(uploadDir));
 
@@ -28,7 +37,7 @@ app.get('/docs.json', (req, res) => {
 app.use('/api/user', userRouter);
 app.use('/api/ai', aiRouter);
 
-const host = '0.0.0.0';
+const host = process.env.HOST || (envName === 'development' ? '0.0.0.0' : '127.0.0.1');
 
 app.listen(config.port, host, () => {
   console.log(`Server running at http://${host}:${config.port}`);
