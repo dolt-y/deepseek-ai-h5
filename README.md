@@ -90,6 +90,7 @@ make -j4
 
 # 线上nginx 配置
 
+```js
 server {
     listen 80;
     server_name 8.145.57.251;   # 如果有域名，替换成你的域名
@@ -138,5 +139,6 @@ server {
         access_log off;
     }
 }
+```
 
-# 线上体验地址:http://8.145.57.251
+##  线上体验地址:http://8.145.57.251
