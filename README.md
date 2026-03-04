@@ -87,3 +87,56 @@ make -j4
 
 编译完成后会生成 `build/bin/whisper-cli`，模型位于 `models/ggml-*.bin`。  
 若按默认配置运行后端，无需额外设置 `WHISPER_ROOT`；如放在其他目录，请在后端 `.env` 中显式配置 `WHISPER_ROOT`。
+
+# 线上nginx 配置
+
+server {
+    listen 80;
+    server_name 8.145.57.251;   # 如果有域名，替换成你的域名
+
+    root /www/wwwroot/your-h5-dist;  # 改成你的 dist 目录
+    index index.html;
+
+    # Vue 单页应用
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 后端 API
+    location /api/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # SSE 关键配置
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+        proxy_buffering off;
+        add_header X-Accel-Buffering no;
+    }
+
+    # 上传文件访问
+    location /uploads/ {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+    }
+
+    # Swagger（可选）
+    location /docs {
+        proxy_pass http://127.0.0.1:3000;
+    }
+    location = /docs.json {
+        proxy_pass http://127.0.0.1:3000;
+    }
+
+    # 静态资源缓存
+    location ~* \.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?)$ {
+        expires 7d;
+        access_log off;
+    }
+}
+
+# 线上体验地址:http://8.145.57.251
