@@ -1,6 +1,6 @@
 # 项目重制说明 
 
-- 2026-2-28项目迁移目标: 为了更好的统一前后端开发及vibingcoding协作方式，将项目重制为monorepo模式。
+- 2026-2-28项目迁移目标: 为了更好的统一前后端开发及Vibe Coding协作方式，将项目重制为monorepo模式。
 
 ## 一、项目定位
 一个 H5/小程序通用的 AI 对话系统，包含：
@@ -10,7 +10,7 @@
 ## 二、当前仓库结构
 - `wechat-ai-fontend/`：H5 前端（Vite + Vue 3）
 - `wechat-ai-backend/`：Node.js 后端（Express + SQLite）
-- `vibing-coding/`：迭代需求与发布文档规范
+- `plan/`：迭代需求与发布文档规范
 - `AGENTS.md`：协作与运行说明
 
 ## 三、运行方式（Monorepo）
@@ -59,7 +59,7 @@ npm run dev:backend
 ## 七、文档入口
 - 后端统一文档：`wechat-ai-backend/README.md`
 - 前端说明：`wechat-ai-fontend/README.md`
-- 迭代规范：`vibing-coding/README.md`
+- 迭代规范：`plan/README.md`
 
 ## 八、whisper.cpp 本地模型编译说明
 后端语音识别依赖 `whisper.cpp` 本地可执行程序，建议在 `wechat-ai-backend` 目录下执行：

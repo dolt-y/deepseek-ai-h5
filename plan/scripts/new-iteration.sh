@@ -3,7 +3,7 @@ set -e
 
 name="$1"
 if [ -z "$name" ]; then
-  echo "Usage: ./vibing-coding/scripts/new-iteration.sh \"YYYY-MM-DD-vX.Y.Z-短标题\""
+  echo "Usage: ./plan/scripts/new-iteration.sh \"YYYY-MM-DD-vX.Y.Z-短标题\""
   exit 1
 fi
 

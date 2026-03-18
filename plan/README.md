@@ -14,7 +14,7 @@
 
 创建新迭代
 - 推荐命名：`YYYY-MM-DD-vX.Y.Z-短标题`
-- 使用脚本：`./vibing-coding/scripts/new-iteration.sh "YYYY-MM-DD-vX.Y.Z-短标题"`
+- 使用脚本：`./plan/scripts/new-iteration.sh "YYYY-MM-DD-vX.Y.Z-短标题"`
 - 手动复制：复制 `templates/iteration` 到 `iterations/` 并重命名
 
 填写顺序
