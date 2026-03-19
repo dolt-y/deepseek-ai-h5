@@ -1,193 +1,228 @@
-# AI-H5 · 智能对话助手应用
+# wechat-ai-fontend 前端说明
 
-[![Vue 3](https://img.shields.io/badge/Vue-3.5.13-brightgreen)](https://vuejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.3.5-green)](https://vitejs.dev/)
-[![License](https://img.shields.io/badge/License-MIT-yellow)](#)
+`wechat-ai-fontend` 是本仓库的 H5 聊天前端，基于 Vue 3 + TypeScript + Vite 构建，面向手机端聊天场景，依赖 `wechat-ai-backend` 提供登录、会话、流式对话、语音转写等接口。
 
-一个基于 Vue 3 + TypeScript 开发的 AI 对话助手应用，支持流式响应、会话管理和多模型切换。
+## 项目定位
 
-## ✨ 核心功能
+- 提供 H5 端 AI 对话界面
+- 通过 SSE 实时接收模型回复
+- 支持历史会话、图片提问、语音转文字、消息点赞与重新生成
+- 默认对接同仓库后端，不直接请求 OpenAI
 
-### � 流式响应
-- 支持 SSE 流式数据接收，实时显示 AI 回复
-- 分块解析与缓冲，处理不完整的数据块
-- 使用 `requestAnimationFrame` 优化渲染性能
+## 当前能力
 
-### 💬 会话管理
-- 支持创建、切换、删除历史会话
-- 会话间相互隔离，独立存储上下文
-- 自动保存消息历史，可随时查看
+- H5 自动登录
+  - 页面加载时优先读取 URL 中的 `token`
+  - 如果 URL 未传 `token`，会自动调用 `/api/user/login/h5`
+  - 登录成功后将 JWT 写入 `localStorage.token`
+- 流式对话
+  - 调用 `/api/ai/chat`
+  - 通过 SSE 解析 `delta`、`thinking`、`done` 事件
+  - 支持展示推理内容折叠区
+- 会话管理
+  - 获取历史会话列表
+  - 加载指定会话消息
+  - 删除会话
+- 多模态输入
+  - 文本消息
+  - 图片上传后发起对话
+  - 语音录制并调用后端转写
+- 消息交互
+  - Markdown 渲染
+  - 代码块复制与 HTML 预览
+  - 助手消息点赞
+  - 助手消息重新生成
 
-### 🎯 多模型支持
-- 提供两种 AI 模型：
-  - 快速问答模型（deepseek-chat）
-  - 深度思考模型（deepseek-reasoner）
-- 可在对话过程中动态切换模型
+## 技术栈
 
-### 📝 Markdown 渲染
-- 支持代码块、表格、列表、引用等 Markdown 语法
-- 代码高亮显示
-- 安全的 HTML 渲染，链接自动在新窗口打开
+- Vue 3
+- TypeScript
+- Vite
+- Element Plus
+- `markdown-it`
+- `highlight.js`
+- `recordrtc`
+- Sass
 
-### 🎨 交互功能
-- AI 回复时显示加载动画
-- 自动滚动到最新消息
-- 消息支持复制、点赞、重新生成
+## 目录结构
 
-## 🏗️ 项目结构
-
+```text
+wechat-ai-fontend/
+├── public/                      # 静态资源
+├── src/
+│   ├── App.vue                  # 页面入口，组合聊天、录音、鉴权能力
+│   ├── assets/                  # 图标与图片资源
+│   ├── components/              # 聊天 UI 组件
+│   ├── hook/
+│   │   ├── useChatAuth.ts       # H5 自动登录与用户信息处理
+│   │   ├── useChatConversation.ts # 会话与消息主流程
+│   │   ├── useChatRecording.ts  # 录音与语音识别请求
+│   │   ├── useChatScroll.ts     # 滚动到底部逻辑
+│   │   └── useChatStream.ts     # SSE 流式响应处理
+│   ├── utils/
+│   │   ├── api.ts               # 接口路径与后端基地址拼接
+│   │   ├── request.ts           # 普通请求封装
+│   │   ├── streamRequest.ts     # SSE 请求封装
+│   │   ├── markdown.ts          # Markdown 渲染配置
+│   │   ├── media.ts             # 图片 URL 处理
+│   │   └── type.ts              # 业务类型定义
+│   ├── style.scss               # 全局主题样式
+│   └── main.ts                  # 应用入口
+├── package.json
+└── README.md
 ```
-├─ src
-│  ├─ App.vue                  # 主应用组件
-│  ├─ assets                   # 静态资源
-│  ├─ components               # 组件目录
-│  │  ├─ HistroySessions.vue   # 历史会话组件
-│  │  ├─ InputArea.vue         # 输入区域组件
-│  │  ├─ MessageItem.vue       # 消息项组件
-│  │  ├─ RecordingIndicator.vue # 录音指示器组件
-│  │  └─ SettingsPanel.vue     # 设置面板组件
-│  ├─ hook                     # 自定义 Hook
-│  │  ├─ useChatRecording.ts   # 聊天录音 Hook
-│  │  ├─ useChatScroll.ts      # 聊天滚动 Hook
-│  │  └─ useChatStream.ts      # 聊天流处理 Hook
-│  ├─ utils                    # 工具函数
-│  │  ├─ api.ts                # API 配置
-│  │  ├─ markdown.ts           # Markdown 处理
-│  │  ├─ request.ts            # 请求封装
-│  │  ├─ streamRequest.ts      # 流式请求处理
-│  │  ├─ tools.ts              # 工具函数
-│  │  └─ type.ts               # 类型定义
-│  ├─ main.ts                  # 应用入口
-│  ├─ style.scss               # 全局样式
-│  └─ vite-env.d.ts            # Vite 类型声明
+
+## 运行要求
+
+- Node.js `>= 20.18.0`
+- npm `>= 10`
+- 已启动可访问的后端服务
+
+## 环境变量
+
+前端只依赖一个运行时基地址：
+
+```bash
+VITE_OPENAI_BASE_URL=http://localhost:3000
 ```
 
-## 🔧 技术栈
+说明：
 
-| 技术 | 版本 | 用途 |
-|-----|------|------|
-| Vue | 3.5.13 | 前端框架 |
-| TypeScript | 5.8 | 类型安全 |
-| Vite | 6.3.5 | 构建工具 |
-| Markdown-it | 14.1.0 | Markdown 渲染 |
-| highlight.js | 内置 | 代码高亮 |
-| SCSS | 1.94.2 | 样式预处理 |
-| Element Plus | 2.10.4 | UI 组件库 |
+- 虽然变量名叫 `VITE_OPENAI_BASE_URL`，实际含义是“后端 API 服务地址”
+- 前端会将它与 `/api/user/*`、`/api/ai/*`、`/uploads/*` 拼接
+- 推荐写在 `wechat-ai-fontend/.env.local` 或 `wechat-ai-fontend/.env.development`
 
-## 📥 快速开始
+## 快速开始
 
-### 前置要求
-- Node.js >= 16
-- npm 或 yarn
+在仓库根目录启动：
 
-### 安装依赖
 ```bash
 npm install
+npm run dev:frontend
 ```
 
-### 开发服务器
+或者在前端目录单独启动：
+
 ```bash
+cd wechat-ai-fontend
+npm install
 npm run dev
 ```
-访问 `http://localhost:5173`
 
-### 生产构建
+默认开发地址：
+
+```text
+http://localhost:5173
+```
+
+生产构建：
+
 ```bash
+cd wechat-ai-fontend
 npm run build
 ```
 
-构建输出到 `dist/` 目录
+本地预览构建结果：
 
-### 预览构建结果
 ```bash
+cd wechat-ai-fontend
 npm run preview
 ```
 
-## 🎯 核心业务流程
+## 与后端的接口约定
 
-### 对话流程
-1. 用户输入消息并发送
-2. 创建用户消息并显示
-3. 调用 AI 接口获取流式响应
-4. 创建助手消息，显示加载状态
-5. 接收 SSE 数据流，实时渲染内容
-6. 流结束后更新消息状态
-7. 用户可对消息进行操作（复制、点赞、重新生成）
+前端当前直接依赖以下接口：
 
-### 会话管理流程
-1. 新建会话
-2. 获取会话 ID，用于后续对话关联
-3. 切换历史会话时加载对应消息
-4. 智能滚动到消息底部
+| 能力 | 方法 | 路径 |
+| --- | --- | --- |
+| H5 登录 | `POST` | `/api/user/login/h5` |
+| 获取会话列表 | `GET` | `/api/ai/sessions` |
+| 获取会话消息 | `GET` | `/api/ai/sessions/:id/messages` |
+| 删除会话 | `POST` | `/api/ai/sessions/:id/delete` |
+| 发起对话 | `POST` | `/api/ai/chat` |
+| 语音转文字 | `POST` | `/api/ai/speech-to-text` |
+| 点赞消息 | `POST` | `/api/ai/messages/:id/like` |
 
-## 🔐 API 接口
+补充说明：
 
-### 对话接口
-```typescript
-POST /api/ai/chat
-Body: {
-  messages: Array<{ role: string; content: string }>,
-  sessionId?: string | number,
-  stream: true,
-  model: string  // "deepseek-chat" | "deepseek-reasoner"
+- 除 `/api/user/login/h5` 外，其余请求都依赖 `Authorization: Bearer <token>`
+- 普通文本对话使用 JSON 请求
+- 图片提问使用 `multipart/form-data`，字段包含 `messages`、`image`、`model`、`stream`、`sessionId`
+- 历史图片消息通过 `VITE_OPENAI_BASE_URL + /uploads/...` 访问
+
+## 登录与鉴权说明
+
+当前前端内置了一套 H5 调试登录逻辑：
+
+```json
+{
+  "username": "h5_test",
+  "password": "pass123"
 }
-Response: 流式 SSE
-  data: 文本块
-  [可选] event: 事件类型
-  [可选] id: 事件 ID
 ```
 
-### 会话接口
-```typescript
-POST /api/ai/sessions
-Body: { title: string; summary?: string }
-Response: { session: { id: string | number; ... } }
+实际行为如下：
 
-GET /api/ai/sessions/{id}/messages
-Response: { messages: Array<HistoryMessage> }
-  HistoryMessage = {
-    role: "assistant" | "user",
-    content: string,
-    created_at?: string
-  }
-```
+1. 如果页面 URL 带有 `token`，前端直接使用该 token。
+2. 如果 URL 同时带有 `token`、`nickname`、`avatarUrl`，会覆盖页面展示的用户信息。
+3. 如果没有 `token`，前端会自动调用 `/api/user/login/h5`。
+4. 登录成功后，token 保存到 `localStorage.token`，后续请求自动携带。
 
-## 📱 浏览器兼容性
+如果后端关闭了这个调试账号，前端也需要同步调整 `src/hook/useChatAuth.ts`。
 
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
+## 核心交互流程
 
-## 🔄 后续开发方向
+### 文本对话
 
-- 完善语音输入功能
-- 支持消息搜索与过滤
-- 实现对话记录导出
-- 添加 PWA 支持
-- 完善用户认证体系
-- 集成更多 AI 模型
+1. 用户输入文本并发送
+2. 前端先插入本地用户消息
+3. 调用 `/api/ai/chat`
+4. 监听 SSE 事件流
+5. 按字符平滑渲染助手回复
+6. 收到 `done` 后更新 `sessionId`
 
-## 📄 主要文件说明
+### 图片提问
+
+1. 用户选择图片
+2. 前端生成本地预览图
+3. 以 `multipart/form-data` 上传图片和消息体
+4. 后端保存图片并返回流式回复
+
+### 语音输入
+
+1. 前端录音后生成音频 Blob
+2. 上传到 `/api/ai/speech-to-text`
+3. 后端返回识别文本
+4. 前端将识别结果回填到输入框
+
+## 主要文件说明
 
 | 文件 | 说明 |
-|-----|------|
-| `streamRequest.ts` | 流式数据解析核心实现 |
-| `App.vue` | 主业务逻辑，包含对话流程和会话管理 |
-| `MessageItem.vue` | 消息渲染与交互处理 |
-| `InputArea.vue` | 输入框、模型切换、会话操作 |
-| `markdown.ts` | Markdown 渲染配置 |
-| `style.scss` | 全局样式 |
+| --- | --- |
+| `src/App.vue` | 页面总装配，挂载消息流、录音、会话列表 |
+| `src/hook/useChatConversation.ts` | 文本/图片消息发送、历史消息切换、点赞与重新生成功能入口 |
+| `src/hook/useChatStream.ts` | 处理 SSE 增量文本与推理内容 |
+| `src/hook/useChatAuth.ts` | H5 自动登录、URL token 注入 |
+| `src/hook/useChatRecording.ts` | 录音和语音转写上传 |
+| `src/utils/api.ts` | 所有 API 地址定义 |
+| `src/utils/request.ts` | JSON / FormData 请求封装 |
+| `src/utils/streamRequest.ts` | SSE 读取与事件分发 |
+| `src/style.scss` | 全局样式与主题变量 |
 
-## 🤝 贡献
+## 构建与部署建议
 
-欢迎提交 PR 和 Issue！
+- 前端生产环境建议与后端挂在同一域名下，通过 Nginx 反向代理 `/api` 和 `/uploads`
+- 如果前后端跨域部署，需要确认后端或网关已正确处理 CORS
+- 打包产物位于 `wechat-ai-fontend/dist`
 
-## 📝 许可证
+## 已知限制
 
-MIT License
+- 当前没有自动化测试
+- 模型选项在前端写死为 `deepseek-chat` 和 `deepseek-reasoner`
+- H5 登录默认依赖内置测试账号，不适合直接作为正式生产登录方案
+- 语音识别是否可用取决于后端 `whisper.cpp` 是否已正确安装
 
----
-**最后更新**: 2025年12月8日  
-**Repository**: [github.com/dolt-y/AI-H5](https://github.com/dolt-y/AI-H5)
+## 相关文档
+
+- 仓库入口说明：`../README.md`
+- 后端说明：`../wechat-ai-backend/README.md`
