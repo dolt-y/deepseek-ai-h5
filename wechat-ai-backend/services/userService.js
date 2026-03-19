@@ -7,7 +7,7 @@ import {
   getUserByUsername,
   createH5User,
   updateLastLogin,
-  updateProfileIfProvided
+  updateProfileIfProvided,
 } from '../repositories/userRepository.js';
 import { createPasswordHash, verifyPassword } from '../utils/password.js';
 import { AppError } from '../errors/AppError.js';
@@ -31,14 +31,17 @@ export async function loginMiniProgram(code, userInfo) {
     throw new AppError('code不能为空', 400);
   }
 
-  const response = await axios.get('https://api.weixin.qq.com/sns/jscode2session', {
-    params: {
-      appid: config.wxAppId,
-      secret: config.wxAppSecret,
-      js_code: code,
-      grant_type: 'authorization_code'
+  const response = await axios.get(
+    'https://api.weixin.qq.com/sns/jscode2session',
+    {
+      params: {
+        appid: config.wxAppId,
+        secret: config.wxAppSecret,
+        js_code: code,
+        grant_type: 'authorization_code',
+      },
     }
-  });
+  );
 
   const data = response.data;
   if (data.errcode) {

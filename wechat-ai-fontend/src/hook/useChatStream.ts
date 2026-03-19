@@ -53,13 +53,12 @@ export function useChatStream(scrollToBottom: ScrollToBottomFn) {
     messages.push(assistantMsg);
     scrollToBottom(`message-${assistantMsg.id}`);
 
-    // --- 核心优化变量：实现打字机效果和平滑滚动 ---
     const queue: string[] = []; // 待渲染字符队列
     let isAnimating = false; // 动画锁
     let displayBuffer = ''; // 当前已显示的纯文本缓冲区
     let hasThinkingUpdate = false; // 思考内容是否有更新的标记
 
-    // 消费队列的渲染循环 (使用 requestAnimationFrame 限制更新频率)
+    // 消费队列的渲染循环
     const flushQueue = () => {
       // 只要队列有内容或思考内容有更新，就认为需要滚动
       const shouldScroll = queue.length > 0 || hasThinkingUpdate;

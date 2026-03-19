@@ -1,6 +1,10 @@
 // 智能缓冲：合并小片段再 emit，减少前端收到的碎片化文本
 // emitFn 接受一个事件对象
-export async function handleBufferedStreamResponse(completion, emitFn, options = {}) {
+export async function handleBufferedStreamResponse(
+  completion,
+  emitFn,
+  options = {}
+) {
   const minChars = options.minChars || 40;
   const maxWait = options.maxWait || 200;
   const boundaryRegex = options.boundaryRegex || /\n\n|[。！？.!?]\s*$/;
@@ -35,7 +39,7 @@ export async function handleBufferedStreamResponse(completion, emitFn, options =
       const now = Date.now();
       const shouldByLength = buffer.length >= minChars;
       const shouldByBoundary = boundaryRegex.test(buffer);
-      const shouldByTime = (now - lastEmit) >= maxWait && buffer.length > 0;
+      const shouldByTime = now - lastEmit >= maxWait && buffer.length > 0;
 
       if (shouldByBoundary || shouldByLength || shouldByTime) {
         await emitFn({ type: 'delta', text: buffer });
