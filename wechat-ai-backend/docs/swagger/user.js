@@ -58,7 +58,7 @@ export const userDocs = {};
  *           type: string
  *         model:
  *           type: string
- *           example: deepseek-chat
+ *           example: deepseek-v4-flash
  *         lastLogin:
  *           type: string
  *           format: date-time

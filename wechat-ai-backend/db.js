@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { config } from './config.js';
+import { DEFAULT_MODEL } from './constants/models.js';
 
 export const db = new sqlite3.Database(config.dbFile, (err) => {
   if (err) console.error(err.message);
@@ -14,7 +15,7 @@ db.serialize(() => {
       passwordHash TEXT,
       nickname TEXT,
       avatarUrl TEXT,
-      model TEXT DEFAULT 'deepseek-chat',
+      model TEXT DEFAULT '${DEFAULT_MODEL}',
       lastLogin TEXT
     )
   `);
@@ -55,10 +56,15 @@ db.serialize(() => {
 
   safeAlter(`ALTER TABLE users ADD COLUMN username TEXT`);
   safeAlter(`ALTER TABLE users ADD COLUMN passwordHash TEXT`);
+  safeAlter(`ALTER TABLE users ADD COLUMN model TEXT DEFAULT '${DEFAULT_MODEL}'`);
   db.run(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username)`);
 
   safeAlter(`ALTER TABLE chat_records ADD COLUMN type TEXT DEFAULT 'text'`);
   safeAlter(`ALTER TABLE chat_records ADD COLUMN media TEXT`);
+  db.run(
+    `UPDATE users SET model = ? WHERE model IN ('deepseek-chat', 'deepseek-reasoner')`,
+    [DEFAULT_MODEL]
+  );
 });
 // 数据库操作 Promise 化
 function dbRun(sql, params = []) {

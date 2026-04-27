@@ -26,8 +26,9 @@
                             <span class="setting-desc">选择默认使用的 AI 模型</span>
                         </div>
                         <select v-model="defaultModel" class="setting-select">
-                            <option value="deepseek-chat">快速问答</option>
-                            <option value="deepseek-reasoner">深度思考</option>
+                            <option v-for="model in MODEL_OPTIONS" :key="model.value" :value="model.value">
+                                {{ model.text }}
+                            </option>
                         </select>
                     </div>
                     <div class="setting-item toggle-item">
@@ -111,6 +112,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { ElMessage } from 'element-plus';
+import { DEFAULT_MODEL, MODEL_OPTIONS, isSupportedModel } from '@/constants/models';
 
 const props = defineProps<{
     visible: boolean;
@@ -121,7 +123,7 @@ const emit = defineEmits<{
     (e: 'update-settings', settings: any): void;
 }>();
 
-const defaultModel = ref('deepseek-chat');
+const defaultModel = ref(DEFAULT_MODEL);
 const darkMode = ref(false);
 const showLineNumbers = ref(true);
 const autoScroll = ref(true);
@@ -157,7 +159,7 @@ const loadSettings = () => {
     const saved = localStorage.getItem('appSettings');
     if (saved) {
         const settings = JSON.parse(saved);
-        defaultModel.value = settings.defaultModel || 'deepseek-chat';
+        defaultModel.value = isSupportedModel(settings.defaultModel) ? settings.defaultModel : DEFAULT_MODEL;
         darkMode.value = settings.darkMode || false;
         showLineNumbers.value = settings.showLineNumbers !== undefined ? settings.showLineNumbers : true;
         autoScroll.value = settings.autoScroll !== undefined ? settings.autoScroll : true;
@@ -167,7 +169,7 @@ const loadSettings = () => {
 };
 
 const resetSettings = () => {
-    defaultModel.value = 'deepseek-chat';
+    defaultModel.value = DEFAULT_MODEL;
     darkMode.value = false;
     showLineNumbers.value = true;
     autoScroll.value = true;

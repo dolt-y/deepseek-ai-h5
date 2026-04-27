@@ -1,4 +1,4 @@
-import { openai, createChatCompletion } from '../clients/openaiClient.js';
+import { createChatCompletion } from '../clients/openaiClient.js';
 import {
   createSession,
   listSessionsByOpenid,
@@ -19,6 +19,7 @@ import {
 import { handleBufferedStreamResponse } from '../utils/streamBuffer.js';
 import { AppError } from '../errors/AppError.js';
 import { transcribeSpeech, transcribeSpeechBuffer } from './speechService.js';
+import { getModelListResponse } from '../constants/models.js';
 
 export async function chat({
   openid,
@@ -184,8 +185,7 @@ export async function deleteSessionById(sessionId, openid) {
 }
 
 export async function listModels() {
-  const models = await openai.models.list();
-  return models;
+  return getModelListResponse();
 }
 
 export async function toggleMessageLike(messageId) {

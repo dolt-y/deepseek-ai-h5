@@ -192,7 +192,7 @@ http://localhost:3000/docs.json
   ],
   "sessionId": 1,
   "stream": true,
-  "model": "deepseek-chat"
+  "model": "deepseek-v4-flash"
 }
 ```
 
@@ -202,7 +202,7 @@ http://localhost:3000/docs.json
 - `image`: 图片文件
 - `sessionId`: 可选
 - `stream`: `true`
-- `model`: 模型名
+- `model`: 模型名，支持 `deepseek-v4-flash`、`deepseek-v4-pro`
 
 ### 2. SSE 事件格式
 

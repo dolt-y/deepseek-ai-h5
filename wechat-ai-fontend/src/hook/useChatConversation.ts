@@ -9,6 +9,7 @@ import type {
   HistoryMessage,
 } from '@/utils/type';
 import { resolveMediaUrl } from '@/utils/media';
+import { DEFAULT_MODEL, MODEL_OPTIONS } from '@/constants/models';
 import { useChatScroll } from './useChatScroll';
 import { useChatStream } from './useChatStream';
 
@@ -25,11 +26,8 @@ export function useChatConversation() {
   const sessionId = ref<number | string>();
   const historySessionsVisible = ref<boolean>(false);
 
-  const selectedModel = ref<string>('deepseek-chat');
-  const modelOptions = ref<ModelOption[]>([
-    { value: 'deepseek-chat', text: '快速问答' },
-    { value: 'deepseek-reasoner', text: '深度思考' },
-  ]);
+  const selectedModel = ref<string>(DEFAULT_MODEL);
+  const modelOptions = ref<ModelOption[]>(MODEL_OPTIONS);
 
   function revokeBlobUrls(targetMessages: ChatMessage[]) {
     for (const message of targetMessages) {

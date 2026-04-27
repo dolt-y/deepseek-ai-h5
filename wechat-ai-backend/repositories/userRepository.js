@@ -1,12 +1,13 @@
 import { db, dbRun, dbGet } from '../db.js';
+import { DEFAULT_MODEL } from '../constants/models.js';
 
 // 用户相关数据访问
 export function upsertWeChatUser(openid, userInfo) {
   // 小程序登录：按 openid 插入或更新用户资料
   return dbRun(
     `
-      INSERT INTO users(openid, nickname, avatarUrl, lastLogin)
-      VALUES(?,?,?,datetime('now'))
+      INSERT INTO users(openid, nickname, avatarUrl, model, lastLogin)
+      VALUES(?,?,?,?,datetime('now'))
       ON CONFLICT(openid) DO UPDATE SET
         nickname=excluded.nickname,
         avatarUrl=excluded.avatarUrl,
@@ -15,7 +16,8 @@ export function upsertWeChatUser(openid, userInfo) {
     [
       openid,
       userInfo?.nickName || '',
-      userInfo?.avatarUrl || ''
+      userInfo?.avatarUrl || '',
+      DEFAULT_MODEL
     ]
   );
 }
@@ -39,10 +41,10 @@ export function createH5User(openid, username, passwordHash, userInfo) {
   const avatarUrl = userInfo?.avatarUrl || '';
   return dbRun(
     `
-      INSERT INTO users(openid, username, passwordHash, nickname, avatarUrl, lastLogin)
-      VALUES(?,?,?,?,?,datetime('now'))
+      INSERT INTO users(openid, username, passwordHash, nickname, avatarUrl, model, lastLogin)
+      VALUES(?,?,?,?,?,?,datetime('now'))
     `,
-    [openid, username, passwordHash, nickname, avatarUrl]
+    [openid, username, passwordHash, nickname, avatarUrl, DEFAULT_MODEL]
   );
 }
 

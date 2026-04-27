@@ -39,7 +39,8 @@ export const aiDocs = {};
  *             $ref: '#/components/schemas/ChatMessage'
  *         model:
  *           type: string
- *           example: deepseek-chat
+ *           enum: [deepseek-v4-flash, deepseek-v4-pro]
+ *           example: deepseek-v4-flash
  *         stream:
  *           type: boolean
  *           default: true
@@ -113,7 +114,8 @@ export const aiDocs = {};
  *           default: true
  *         model:
  *           type: string
- *           example: deepseek-chat
+ *           enum: [deepseek-v4-flash, deepseek-v4-pro]
+ *           example: deepseek-v4-flash
  *     LikeResponse:
  *       type: object
  *       properties:
@@ -194,6 +196,8 @@ export const aiDocs = {};
  *                 description: 图片文件（type=image 时可用）
  *               model:
  *                 type: string
+ *                 enum: [deepseek-v4-flash, deepseek-v4-pro]
+ *                 example: deepseek-v4-flash
  *               stream:
  *                 type: boolean
  *               sessionId:
@@ -336,6 +340,31 @@ export const aiDocs = {};
  *     responses:
  *       200:
  *         description: 成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 models:
+ *                   type: object
+ *                   properties:
+ *                     object:
+ *                       type: string
+ *                       example: list
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             enum: [deepseek-v4-flash, deepseek-v4-pro]
+ *                           object:
+ *                             type: string
+ *                             example: model
+ *                           owned_by:
+ *                             type: string
+ *                             example: deepseek
  *       500:
  *         description: 获取失败
  */

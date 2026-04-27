@@ -218,7 +218,7 @@ npm run preview
 ## 已知限制
 
 - 当前没有自动化测试
-- 模型选项在前端写死为 `deepseek-chat` 和 `deepseek-reasoner`
+- 模型选项在前端写死为 `deepseek-v4-flash` 和 `deepseek-v4-pro`
 - H5 登录默认依赖内置测试账号，不适合直接作为正式生产登录方案
 - 语音识别是否可用取决于后端 `whisper.cpp` 是否已正确安装
 

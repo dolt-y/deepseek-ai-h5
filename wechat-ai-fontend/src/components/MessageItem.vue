@@ -25,7 +25,7 @@
                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
-                <span class="reasoning-label">🧠 深度思考</span>
+                <span class="reasoning-label">推理过程</span>
                 <span class="reasoning-length">{{ reasoningContentPreview }}</span>
               </button>
               <transition name="expand">

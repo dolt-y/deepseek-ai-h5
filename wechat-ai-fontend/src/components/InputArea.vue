@@ -51,6 +51,8 @@
 </template>
 <script lang="ts" setup>
 import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import { DEFAULT_MODEL, MODEL_OPTIONS } from '@/constants/models';
+
 const props = defineProps({
   modelValue: {
     type: String,
@@ -70,14 +72,11 @@ const props = defineProps({
   },
   selectedModel: {
     type: String,
-    default: 'deepseek-chat'
+    default: DEFAULT_MODEL
   },
   modelOptions: {
     type: Array as () => Array<{ value: string; text: string }>,
-    default: () => [
-      { value: "deepseek-chat", text: "DeepSeek-快速问答" },
-      { value: 'deepseek-reasoner', text: "DeepSeek-深度思考" }
-    ]
+    default: () => MODEL_OPTIONS
   },
   showModelSelector: {
     type: Boolean,
@@ -145,7 +144,7 @@ function toggleRecording() {
 const isModelDropdownOpen = ref(false);
 const selectedModelText = computed(() => {
   const model = props.modelOptions.find(m => m.value === props.selectedModel);
-  return model ? model.text : '快速问答';
+  return model ? model.text : 'V4 Flash';
 });
 
 function toggleModelDropdown() {
