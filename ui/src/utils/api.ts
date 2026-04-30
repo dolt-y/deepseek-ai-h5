@@ -7,6 +7,8 @@ export const fixedApi = {
     chat: "/api/ai/chat",
     recording:'/api/ai/speech-to-text/jobs',
     h5Login: "/api/user/login/h5",
+    userInfo: "/api/user/info",
+    refreshToken: "/api/user/refresh",
 } as const;
 
 // 动态接口，需传入参数

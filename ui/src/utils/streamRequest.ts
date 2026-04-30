@@ -1,3 +1,5 @@
+import { getAccessToken, getRefreshToken, refreshAccessToken } from '@/utils/request';
+
 interface StreamOptions {
   url: string | ((...args: any[]) => string);
   data: any;
@@ -7,7 +9,21 @@ interface StreamOptions {
   onError?: (err: any) => void;
 }
 
-const getToken = () => localStorage.getItem('token') || '';
+function buildStreamRequest(realUrl: string, data: any, accessToken: string) {
+  const isFormData = data instanceof FormData;
+  const headers: Record<string, string> = {
+    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {})
+  };
+  if (!isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  return fetch(realUrl, {
+    method: 'POST',
+    headers,
+    body: isFormData ? data : JSON.stringify(data)
+  });
+}
 
 export async function streamFetch({
   url,
@@ -21,19 +37,17 @@ export async function streamFetch({
     const isFormData = data instanceof FormData;
     const realUrl =
       typeof url === 'function' ? url(isFormData ? undefined : data?.sessionId) : url;
-    const token = getToken();
-    const headers: Record<string, string> = {
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-    };
-    if (!isFormData) {
-      headers['Content-Type'] = 'application/json';
-    }
 
-    const res = await fetch(realUrl, {
-      method: 'POST',
-      headers,
-      body: isFormData ? data : JSON.stringify(data)
-    });
+    let res = await buildStreamRequest(realUrl, data, getAccessToken());
+
+    if (res.status === 401 && getRefreshToken()) {
+      try {
+        const nextAccessToken = await refreshAccessToken();
+        res = await buildStreamRequest(realUrl, data, nextAccessToken);
+      } catch (err) {
+        // 保留原 401 响应，让下面的错误解析给调用方统一展示。
+      }
+    }
 
     if (!res.ok) {
       const contentType = res.headers.get('content-type') || '';

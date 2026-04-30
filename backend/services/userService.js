@@ -13,9 +13,21 @@ import { createPasswordHash, verifyPassword } from '../utils/password.js';
 import { AppError } from '../errors/AppError.js';
 
 const H5_OPENID_PREFIX = 'h5:';
+const ACCESS_TOKEN_EXPIRES_IN = '15m';
+const REFRESH_TOKEN_EXPIRES_IN = '7d';
 
-function signToken(openid, expiresIn = '1d') {
-  return jwt.sign({ openid }, config.jwtSecret, { expiresIn });
+function signToken(openid, type, expiresIn) {
+  return jwt.sign({ openid, type }, config.jwtSecret, { expiresIn });
+}
+
+function issueAuthTokens(openid) {
+  const accessToken = signToken(openid, 'access', ACCESS_TOKEN_EXPIRES_IN);
+  const refreshToken = signToken(openid, 'refresh', REFRESH_TOKEN_EXPIRES_IN);
+  return {
+    accessToken,
+    refreshToken,
+    token: accessToken,
+  };
 }
 
 function normalizeUsername(username) {
@@ -54,8 +66,7 @@ export async function loginMiniProgram(code, userInfo) {
   }
 
   await upsertWeChatUser(openid, userInfo);
-  const token = signToken(openid, '1d');
-  return { token };
+  return issueAuthTokens(openid);
 }
 
 export async function loginH5(username, password, userInfo) {
@@ -82,15 +93,13 @@ export async function loginH5(username, password, userInfo) {
       await updateLastLogin(existing.openid);
     }
 
-    const token = signToken(existing.openid, '1d');
-    return { token };
+    return issueAuthTokens(existing.openid);
   }
 
   const openid = buildH5Openid(normalizedUsername);
   const passwordHash = createPasswordHash(password);
   await createH5User(openid, normalizedUsername, passwordHash, userInfo);
-  const token = signToken(openid, '1d');
-  return { token };
+  return issueAuthTokens(openid);
 }
 
 export async function getUserInfo(openid) {
@@ -102,7 +111,26 @@ export async function getUserInfo(openid) {
   return safeUser;
 }
 
-export function refreshToken(openid) {
-  const token = signToken(openid, '7d');
-  return { token };
+export async function refreshAuthTokens(refreshTokenValue) {
+  if (!refreshTokenValue) {
+    throw new AppError('refreshToken不能为空', 401);
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshTokenValue, config.jwtSecret);
+  } catch (err) {
+    throw new AppError('refreshToken 无效或已过期', 401);
+  }
+
+  if (!decoded?.openid || decoded.type !== 'refresh') {
+    throw new AppError('refreshToken 类型错误', 401);
+  }
+
+  const user = await getUserByOpenid(decoded.openid);
+  if (!user) {
+    throw new AppError('用户不存在，请重新登录', 401);
+  }
+
+  return issueAuthTokens(decoded.openid);
 }

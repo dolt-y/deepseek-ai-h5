@@ -40,11 +40,26 @@ export const userDocs = {};
  *     TokenResponse:
  *       type: object
  *       properties:
+ *         accessToken:
+ *           type: string
+ *           description: 短期访问令牌，用于业务接口 Authorization Bearer
+ *         refreshToken:
+ *           type: string
+ *           description: 长期刷新令牌，仅用于 /api/user/refresh
  *         token:
  *           type: string
+ *           description: accessToken 的兼容别名
  *         msg:
  *           type: string
  *           example: 登录成功
+ *     RefreshTokenRequest:
+ *       type: object
+ *       required:
+ *         - refreshToken
+ *       properties:
+ *         refreshToken:
+ *           type: string
+ *           description: 登录接口返回的 refreshToken
  *     UserInfo:
  *       type: object
  *       properties:
@@ -146,9 +161,13 @@ export const userDocs = {};
  * /api/user/refresh:
  *   post:
  *     tags: [User]
- *     summary: 刷新 token（需在旧 token 未过期时调用）
- *     security:
- *       - bearerAuth: []
+ *     summary: 使用 refreshToken 静默刷新 accessToken
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RefreshTokenRequest'
  *     responses:
  *       200:
  *         description: 刷新成功

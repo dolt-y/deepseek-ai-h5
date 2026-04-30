@@ -74,7 +74,9 @@ API surface (backend)
 
 Conventions
 - Frontend reads base URL from `import.meta.env.VITE_OPENAI_BASE_URL`.
-- `/api/ai/*` routes require `Authorization: Bearer <token>`.
+- Login returns `accessToken` + `refreshToken`; `token` is a compatibility alias for `accessToken`.
+- `/api/ai/*` routes require `Authorization: Bearer <accessToken>`.
+- `/api/user/refresh` receives `refreshToken` in the JSON body and returns a new token pair.
 - Chat responses stream via SSE.
 
 Generated or large artifacts (avoid editing unless required)
