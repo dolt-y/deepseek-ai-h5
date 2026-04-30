@@ -1,4 +1,4 @@
-# H5 AI Chat Monorepo
+# AI 智能助手
 
 本项目是一个 H5 / 小程序通用的 AI 对话系统，采用前后端同仓库维护：
 
@@ -415,7 +415,3 @@ location /uploads/ {
 - `/api/ai/models` 依赖上游模型服务的 `models.list()` 能力。
 - H5 默认登录账号仅适合本地调试，不适合直接作为正式生产登录方案。
 - 语音识别依赖 Redis、BullMQ worker 与本地 `whisper.cpp` 环境。
-
-## 文档约定
-
-项目说明统一维护在本文件。`backend/README.md`、`ui/README.md` 和散落模块说明已移除，避免多处文档内容重复和过期。
