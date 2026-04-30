@@ -1,17 +1,35 @@
 // src/hooks/chat/useChatRecording.ts
 import { ref } from 'vue';
 import NativeRecorder from '@/utils/NativeRecorder';
-import { post } from '@/utils/request';
+import { get, post } from '@/utils/request';
 import api from '@/utils/api';
 
 type RecordingOptions = {
   onRecognized?: (text: string) => void;
 };
 
+type SpeechJobCreateResponse = {
+  jobId: string | number;
+};
+
+type SpeechJobQueryResponse = {
+  job: {
+    state: string;
+    text?: string;
+    failedReason?: string;
+  };
+};
+
+const SPEECH_JOB_MAX_ATTEMPTS = 60;
+const SPEECH_JOB_POLL_INTERVAL = 1000;
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export function useChatRecording(options: RecordingOptions = {}) {
   const isRecording = ref(false);
   const recordingDuration = ref(0);
-  const isCancel = ref(false);
   const isTranscribing = ref(false);
 
   let recordingTimer: number | null = null;
@@ -21,7 +39,6 @@ export function useChatRecording(options: RecordingOptions = {}) {
 
     isRecording.value = true;
     recordingDuration.value = 0;
-    isCancel.value = false;
 
     recordingTimer = setInterval(() => {
       recordingDuration.value += 1;
@@ -43,7 +60,7 @@ export function useChatRecording(options: RecordingOptions = {}) {
   /**
    * 停止录音 -> 上传后端 -> 返回识别文本
    */
-  async function stopRecording() {
+  async function handleStopRecording() {
     if (!isRecording.value) return;
 
     if (recordingTimer) {
@@ -54,18 +71,11 @@ export function useChatRecording(options: RecordingOptions = {}) {
     isRecording.value = false;
     recordingDuration.value = 0;
 
-    // 获取录音文件（Blob）
     const wavBlob = await NativeRecorder.stop();
-    console.log('wavBlob:', wavBlob);
 
-    // 如果被取消，不上传
-    // if (isCancel.value) return "";
-
-    // 上传到后端 Whisper API
     try {
       isTranscribing.value = true;
       const text = await uploadSpeech(wavBlob);
-      console.log('识别文本:', text);
       if (text) {
         options.onRecognized?.(text);
       }
@@ -78,31 +88,37 @@ export function useChatRecording(options: RecordingOptions = {}) {
     }
   }
 
-  function handleStopRecording() {
-    isCancel.value = true;
-    stopRecording();
-  }
-
   /**
-   * 上传录音到 Whisper 转文字接口
+   * 上传录音到 Whisper 异步转文字接口
    */
   async function uploadSpeech(wavBlob: Blob | any): Promise<string> {
     const formData = new FormData();
 
     formData.append('audio', wavBlob, 'audio.wav');
-    const result = await post<any>(api.recording, formData);
-    console.log(result.text);
+    const result = await post<SpeechJobCreateResponse>(api.recording, formData);
 
-    return result.text || '';
+    for (let i = 0; i < SPEECH_JOB_MAX_ATTEMPTS; i++) {
+      const status = await get<SpeechJobQueryResponse>(api.recordingJob(result.jobId));
+
+      if (status.job.state === 'completed') {
+        return status.job.text || '';
+      }
+
+      if (status.job.state === 'failed') {
+        throw new Error(status.job.failedReason || '语音识别任务失败');
+      }
+
+      await sleep(SPEECH_JOB_POLL_INTERVAL);
+    }
+
+    throw new Error('语音识别任务超时');
   }
 
   return {
     isRecording,
     recordingDuration,
-    isCancel,
     isTranscribing,
     handleStartRecording,
     handleStopRecording,
-    stopRecording,
   };
 }

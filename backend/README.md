@@ -1,6 +1,6 @@
-# wechat-ai-backend 后端说明
+# backend 后端说明
 
-`wechat-ai-backend` 是本仓库的 API 服务端，基于 Express + SQLite 实现，负责用户鉴权、会话持久化、AI 流式回复、图片上传、语音转写和 Swagger 文档输出。
+`backend` 是本仓库的 API 服务端，基于 Express + SQLite 实现，负责用户鉴权、会话持久化、AI 流式回复、图片上传、语音转写和 Swagger 文档输出。
 
 ## 项目定位
 
@@ -15,6 +15,8 @@
 - Node.js ESM
 - Express 5
 - SQLite3
+- Redis
+- BullMQ
 - JWT
 - OpenAI Node SDK
 - Multer
@@ -24,19 +26,23 @@
 ## 目录结构
 
 ```text
-wechat-ai-backend/
+backend/
 ├── clients/
 │   └── openaiClient.js          # OpenAI / DeepSeek 客户端封装
 ├── controllers/                # 控制器层，负责请求入参与响应
 ├── docs/swagger/               # Swagger 注释定义
 ├── errors/                     # 业务错误类型
+├── jobs/                       # 定时/后台任务逻辑
 ├── middleware/
 │   ├── auth.js                 # JWT 鉴权
+│   ├── rateLimit.js            # Redis 限流
 │   ├── upload.js               # 图片/音频上传处理
 │   └── whisper.js              # whisper.cpp CLI 封装
+├── queues/                    # Redis/BullMQ 队列封装
 ├── repositories/              # SQLite 数据访问层
 ├── routes/                    # 路由定义
 ├── services/                  # 业务编排层
+├── workers/                   # BullMQ worker 入口
 ├── temp/                      # 语音识别临时文件目录
 ├── uploads/                   # 图片上传目录
 ├── config.js                  # 环境变量加载
@@ -88,6 +94,15 @@ wechat-ai-backend/
 | `SWAGGER_SERVER_URL` | `http://localhost:${PORT}` | Swagger 文档中的服务地址 |
 | `WHISPER_ROOT` | `./whisper.cpp` | whisper.cpp 根目录 |
 | `WHISPER_SAMPLE_PATH` | `./sample-6s.wav` | 默认测试音频路径 |
+| `REDIS_URL` | `redis://127.0.0.1:6379` | Redis 连接地址，限流和 BullMQ 使用 |
+| `LOGIN_RATE_LIMIT_WINDOW_MS` | `600000` | 登录限流窗口 |
+| `LOGIN_RATE_LIMIT_MAX` | `20` | 登录限流窗口内最大请求数 |
+| `AI_RATE_LIMIT_WINDOW_MS` | `60000` | AI 接口限流窗口 |
+| `AI_RATE_LIMIT_MAX` | `60` | AI 接口限流窗口内最大请求数 |
+| `SPEECH_RATE_LIMIT_WINDOW_MS` | `3600000` | 语音接口限流窗口 |
+| `SPEECH_RATE_LIMIT_MAX` | `30` | 语音接口限流窗口内最大请求数 |
+| `CLEANUP_UPLOADS_EVERY_MS` | `3600000` | 上传/临时文件清理任务执行间隔 |
+| `UPLOAD_FILE_MAX_AGE_MS` | `86400000` | 上传/临时文件最大保留时长 |
 
 ### 推荐 `.env` 示例
 
@@ -107,6 +122,9 @@ WX_APP_SECRET=
 # 仅语音识别需要
 WHISPER_ROOT=./whisper.cpp
 WHISPER_SAMPLE_PATH=./sample-6s.wav
+
+# Redis / BullMQ
+REDIS_URL=redis://127.0.0.1:6379
 ```
 
 ## 快速开始
@@ -121,7 +139,7 @@ npm run dev:backend
 或者在后端目录单独启动：
 
 ```bash
-cd wechat-ai-backend
+cd backend
 npm install
 npm run dev
 ```
@@ -129,8 +147,15 @@ npm run dev
 生产启动：
 
 ```bash
-cd wechat-ai-backend
+cd backend
 npm run start
+```
+
+后台 worker：
+
+```bash
+cd backend
+npm run worker:all
 ```
 
 默认访问地址：
@@ -169,7 +194,8 @@ http://localhost:3000/docs.json
 | `GET` | `/api/ai/models` | 是 | 获取模型列表 |
 | `POST` | `/api/ai/messages/:id/like` | 是 | 切换消息点赞状态 |
 | `POST` | `/api/ai/messages/:id/regenerate` | 是 | 重新生成指定助手消息 |
-| `POST` | `/api/ai/speech-to-text` | 是 | 音频转文字 |
+| `POST` | `/api/ai/speech-to-text/jobs` | 是 | 创建异步音频转文字任务 |
+| `GET` | `/api/ai/speech-to-text/jobs/:id` | 是 | 查询异步音频转文字任务 |
 
 鉴权约定：
 
@@ -220,9 +246,9 @@ http://localhost:3000/docs.json
 - `thinking` 表示推理内容增量
 - `done` 表示流结束，并返回最终会话 ID
 
-### 3. 语音转文字 `/api/ai/speech-to-text`
+### 3. 异步语音转文字 `/api/ai/speech-to-text/jobs`
 
-请求方式：
+创建任务：
 
 - `multipart/form-data`
 - 文件字段名：`audio`
@@ -232,10 +258,19 @@ http://localhost:3000/docs.json
 
 ```json
 {
-  "msg": "语音识别成功",
-  "text": "识别后的文本"
+  "msg": "语音识别任务已创建",
+  "jobId": "12",
+  "statusUrl": "/api/ai/speech-to-text/jobs/12"
 }
 ```
+
+查询任务：
+
+```text
+GET /api/ai/speech-to-text/jobs/12
+```
+
+完成时响应中的 `job.text` 为识别结果。
 
 ## 核心业务流程
 
@@ -310,7 +345,7 @@ http://localhost:3000/docs.json
 
 ## whisper.cpp 准备方式
 
-如果需要启用语音识别，在 `wechat-ai-backend` 目录执行：
+如果需要启用语音识别，在 `backend` 目录执行：
 
 ```bash
 git clone https://github.com/ggerganov/whisper.cpp.git
@@ -349,9 +384,9 @@ make -j4
 - 当前没有自动化测试
 - 数据库 schema 通过启动时建表与 `ALTER TABLE` 维护，没有独立迁移工具
 - `/api/ai/models` 依赖上游模型服务的 `models.list()` 能力
-- 语音转写强依赖本地 `whisper.cpp` 环境，部署时要注意二进制与模型文件一致
+- 异步语音转写依赖 Redis、BullMQ worker 与本地 `whisper.cpp` 环境
 
 ## 相关文档
 
 - 仓库入口说明：`../README.md`
-- 前端说明：`../wechat-ai-fontend/README.md`
+- 前端说明：`../ui/README.md`

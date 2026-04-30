@@ -89,7 +89,7 @@ const emit = defineEmits([
   'update:modelValue',
   'send-message',
   'upload-image',
-  'stop-recording',
+  'start-recording',
   'viewHistory',
   'new-session',
   'update:selectedModel'
@@ -137,7 +137,7 @@ function handleSend() {
 }
 function toggleRecording() {
   if (props.isTranscribing) return;
-  emit('stop-recording');
+  emit('start-recording');
 }
 
 // 模型选择相关

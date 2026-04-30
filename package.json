@@ -18,8 +18,8 @@
     "node": ">=20.18.0"
   },
   "workspaces": [
-    "wechat-ai-fontend",
-    "wechat-ai-backend"
+    "ui",
+    "backend"
   ],
   "scripts": {
     "dev:frontend": "npm --workspace ui run dev",

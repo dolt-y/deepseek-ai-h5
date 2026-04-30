@@ -169,9 +169,7 @@ function addCodeButtons() {
         previewBtn.className = 'preview-code-btn';
         previewBtn.textContent = '预览';
         previewBtn.onclick = () => {
-          console.log('preview');
           if (!codeEl) return;
-          console.log(codeEl.textContent);
           previewContent.value = codeEl.textContent || '';
           previewDialogVisible.value = true;
         };

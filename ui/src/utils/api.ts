@@ -5,7 +5,7 @@ const API_BASE = import.meta.env.VITE_OPENAI_BASE_URL
 export const fixedApi = {
     getSessionList: "/api/ai/sessions",
     chat: "/api/ai/chat",
-    recording:'/api/ai/speech-to-text',
+    recording:'/api/ai/speech-to-text/jobs',
     h5Login: "/api/user/login/h5",
 } as const;
 
@@ -14,6 +14,7 @@ export const dynamicApi = {
     deleteSession: (id: string | number) => `/api/ai/sessions/${id}/delete`,
     selectSession: (id: string | number) => `/api/ai/sessions/${id}/messages`,
     like: (id: string | number) => `/api/ai/messages/${id}/like`,
+    recordingJob: (id: string | number) => `/api/ai/speech-to-text/jobs/${id}`,
 } as const;
 
 type FixedKeys = keyof typeof fixedApi;

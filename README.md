@@ -8,8 +8,8 @@
 - 后端：Express + SQLite 的 AI 服务接口
 
 ## 二、当前仓库结构
-- `wechat-ai-fontend/`：H5 前端（Vite + Vue 3）
-- `wechat-ai-backend/`：Node.js 后端（Express + SQLite）
+- `ui/`：H5 前端（Vite + Vue 3）
+- `backend/`：Node.js 后端（Express + SQLite）
 - `plan/`：迭代需求与发布文档规范
 - `AGENTS.md`：协作与运行说明
 
@@ -30,17 +30,23 @@ npm run dev:frontend
 npm run dev:backend
 ```
 
+后台 worker：
+```bash
+npm --prefix backend run worker:all
+```
+
 ## 四、环境变量
-后端（`wechat-ai-backend/.env`）：
+后端（`backend/.env`）：
 - `JWT_SECRET`
 - `DB_FILE`
 - `OPENAI_API_KEY`
 - `OPENAI_BASE_URL`
 - `WX_APP_ID` / `WX_APP_SECRET`（可选）
 - `WHISPER_ROOT` / `WHISPER_SAMPLE_PATH`（可选）
+- `REDIS_URL`（异步语音任务、限流与定时任务使用）
 - `PORT`
 
-前端（`wechat-ai-fontend/.env.development` 或 `.env.local`）：
+前端（`ui/.env.development` 或 `.env.local`）：
 - `VITE_OPENAI_BASE_URL=http://localhost:3000`
 
 ## 五、主要能力（现状对齐）
@@ -49,7 +55,8 @@ npm run dev:backend
 - 会话列表与历史记录
 - 消息点赞与重新生成
 - 图片上传与存储（聊天消息支持图片 URL 持久化）
-- 语音识别（whisper.cpp）
+- 异步语音识别（Redis + BullMQ + whisper.cpp）
+- Redis 限流与 BullMQ 后台任务
 - Swagger API 文档（`/docs`）
 
 ## 六、已知限制
@@ -57,15 +64,15 @@ npm run dev:backend
 - 前后端仍需各自维护环境配置与启动方式。
 
 ## 七、文档入口
-- 后端统一文档：`wechat-ai-backend/README.md`
-- 前端说明：`wechat-ai-fontend/README.md`
+- 后端统一文档：`backend/README.md`
+- 前端说明：`ui/README.md`
 - 迭代规范：`plan/README.md`
 
 ## 八、whisper.cpp 本地模型编译说明
-后端语音识别依赖 `whisper.cpp` 本地可执行程序，建议在 `wechat-ai-backend` 目录下执行：
+后端语音识别依赖 `whisper.cpp` 本地可执行程序，建议在 `backend` 目录下执行：
 
 ```bash
-cd wechat-ai-backend
+cd backend
 git clone https://github.com/ggerganov/whisper.cpp.git
 cd whisper.cpp
 ```

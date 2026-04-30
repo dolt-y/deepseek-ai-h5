@@ -36,7 +36,6 @@ class NativeRecorder {
     }
 
     if (this.setupMediaRecorder()) {
-      console.log("录音开始 (MediaRecorder)");
       return;
     }
 
@@ -57,8 +56,6 @@ class NativeRecorder {
       const input = e.inputBuffer.getChannelData(0);
       this.pcmData.push(new Float32Array(input));
     };
-
-    console.log("录音开始 (ScriptProcessor)");
   }
 
   async stop(): Promise<Blob> {

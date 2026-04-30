@@ -18,7 +18,6 @@ import {
 } from '../repositories/messageRepository.js';
 import { handleBufferedStreamResponse } from '../utils/streamBuffer.js';
 import { AppError } from '../errors/AppError.js';
-import { transcribeSpeech, transcribeSpeechBuffer } from './speechService.js';
 import { getModelListResponse } from '../constants/models.js';
 
 export async function chat({
@@ -269,16 +268,4 @@ export async function regenerateMessage({
   const reply = completion.choices[0].message;
   await updateMessage(messageId, reply.content, null);
   return { messageId, newContent: reply.content };
-}
-
-export async function speechToText({
-  buffer,
-  mimetype,
-  filePath,
-  language = 'zh',
-} = {}) {
-  if (buffer) {
-    return transcribeSpeechBuffer(buffer, mimetype, language);
-  }
-  return transcribeSpeech(filePath, language);
 }

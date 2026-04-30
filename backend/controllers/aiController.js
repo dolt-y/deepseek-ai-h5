@@ -6,9 +6,12 @@ import {
   deleteSessionById,
   listModels,
   toggleMessageLike,
-  regenerateMessage,
-  speechToText
+  regenerateMessage
 } from '../services/aiService.js';
+import {
+  createSpeechToTextJob,
+  getSpeechToTextJob
+} from '../services/speechJobService.js';
 import { normalizeMessages } from '../services/messageService.js';
 import { setupSSEResponse, writeSSE } from '../utils/sse.js';
 import { sendError } from '../utils/error.js';
@@ -174,25 +177,35 @@ export async function regenerateMessageController(req, res) {
   }
 }
 
-export async function speechToTextController(req, res) {
+export async function createSpeechToTextJobController(req, res) {
   try {
     if (!req.file || !req.file.buffer) {
       return res.status(400).json({ msg: '未提供音频文件或文件为空' });
     }
 
-    const language = req.body?.lang || 'zh';
-    const text = await speechToText({
+    const result = await createSpeechToTextJob({
       buffer: req.file.buffer,
       mimetype: req.file.mimetype,
-      language
+      language: req.body?.lang || 'zh',
+      openid: req.user.openid,
+      originalName: req.file.originalname
     });
 
-    return res.json({
-      msg: '语音识别成功',
-      text
+    return res.status(202).json({
+      msg: '语音识别任务已创建',
+      jobId: result.jobId,
+      statusUrl: `/api/ai/speech-to-text/jobs/${result.jobId}`
     });
   } catch (err) {
-    console.error('语音识别失败:', err);
-    res.status(500).json({ msg: '语音识别失败', err: err.message });
+    sendError(res, err, '创建语音识别任务失败');
+  }
+}
+
+export async function getSpeechToTextJobController(req, res) {
+  try {
+    const job = await getSpeechToTextJob(req.params.id, req.user.openid);
+    return res.json({ job });
+  } catch (err) {
+    sendError(res, err, '获取语音识别任务失败');
   }
 }

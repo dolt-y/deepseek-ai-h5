@@ -1,6 +1,6 @@
-# wechat-ai-fontend 前端说明
+# ui 前端说明
 
-`wechat-ai-fontend` 是本仓库的 H5 聊天前端，基于 Vue 3 + TypeScript + Vite 构建，面向手机端聊天场景，依赖 `wechat-ai-backend` 提供登录、会话、流式对话、语音转写等接口。
+`ui` 是本仓库的 H5 聊天前端，基于 Vue 3 + TypeScript + Vite 构建，面向手机端聊天场景，依赖 `backend` 提供登录、会话、流式对话、语音转写等接口。
 
 ## 项目定位
 
@@ -47,7 +47,7 @@
 ## 目录结构
 
 ```text
-wechat-ai-fontend/
+ui/
 ├── public/                      # 静态资源
 ├── src/
 │   ├── App.vue                  # 页面入口，组合聊天、录音、鉴权能力
@@ -90,7 +90,7 @@ VITE_OPENAI_BASE_URL=http://localhost:3000
 
 - 虽然变量名叫 `VITE_OPENAI_BASE_URL`，实际含义是“后端 API 服务地址”
 - 前端会将它与 `/api/user/*`、`/api/ai/*`、`/uploads/*` 拼接
-- 推荐写在 `wechat-ai-fontend/.env.local` 或 `wechat-ai-fontend/.env.development`
+- 推荐写在 `ui/.env.local` 或 `ui/.env.development`
 
 ## 快速开始
 
@@ -104,7 +104,7 @@ npm run dev:frontend
 或者在前端目录单独启动：
 
 ```bash
-cd wechat-ai-fontend
+cd ui
 npm install
 npm run dev
 ```
@@ -118,14 +118,14 @@ http://localhost:5173
 生产构建：
 
 ```bash
-cd wechat-ai-fontend
+cd ui
 npm run build
 ```
 
 本地预览构建结果：
 
 ```bash
-cd wechat-ai-fontend
+cd ui
 npm run preview
 ```
 
@@ -140,7 +140,8 @@ npm run preview
 | 获取会话消息 | `GET` | `/api/ai/sessions/:id/messages` |
 | 删除会话 | `POST` | `/api/ai/sessions/:id/delete` |
 | 发起对话 | `POST` | `/api/ai/chat` |
-| 语音转文字 | `POST` | `/api/ai/speech-to-text` |
+| 创建语音转文字任务 | `POST` | `/api/ai/speech-to-text/jobs` |
+| 查询语音转文字任务 | `GET` | `/api/ai/speech-to-text/jobs/:id` |
 | 点赞消息 | `POST` | `/api/ai/messages/:id/like` |
 
 补充说明：
@@ -191,9 +192,9 @@ npm run preview
 ### 语音输入
 
 1. 前端录音后生成音频 Blob
-2. 上传到 `/api/ai/speech-to-text`
-3. 后端返回识别文本
-4. 前端将识别结果回填到输入框
+2. 上传到 `/api/ai/speech-to-text/jobs` 创建识别任务
+3. 轮询 `/api/ai/speech-to-text/jobs/:id` 获取任务状态
+4. 任务完成后将识别结果回填到输入框
 
 ## 主要文件说明
 
@@ -213,16 +214,16 @@ npm run preview
 
 - 前端生产环境建议与后端挂在同一域名下，通过 Nginx 反向代理 `/api` 和 `/uploads`
 - 如果前后端跨域部署，需要确认后端或网关已正确处理 CORS
-- 打包产物位于 `wechat-ai-fontend/dist`
+- 打包产物位于 `ui/dist`
 
 ## 已知限制
 
 - 当前没有自动化测试
 - 模型选项在前端写死为 `deepseek-v4-flash` 和 `deepseek-v4-pro`
 - H5 登录默认依赖内置测试账号，不适合直接作为正式生产登录方案
-- 语音识别是否可用取决于后端 `whisper.cpp` 是否已正确安装
+- 语音识别依赖后端 Redis、BullMQ worker 与 `whisper.cpp` 是否正常运行
 
 ## 相关文档
 
 - 仓库入口说明：`../README.md`
-- 后端说明：`../wechat-ai-backend/README.md`
+- 后端说明：`../backend/README.md`

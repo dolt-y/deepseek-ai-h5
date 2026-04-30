@@ -9,7 +9,6 @@ export default {
   props: {
     isRecording: Boolean,
     duration: Number,
-    isCancel: Boolean,
     isTranscribing: Boolean
   },
 
@@ -64,10 +63,7 @@ export default {
             ? h(
               'div',
               {
-                class: [
-                  'recording-action',
-                  this.isCancel ? 'cancel' : ''
-                ],
+                class: 'recording-action',
                 onClick: this.handleCancel
               },
               [

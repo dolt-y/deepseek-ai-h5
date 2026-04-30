@@ -126,44 +126,23 @@ export const aiDocs = {};
  *         liked:
  *           type: integer
  *           enum: [0, 1]
- *     SpeechToTextResponse:
+ *     SpeechJobResponse:
  *       type: object
  *       properties:
- *         msg:
- *           type: string
- *           example: 语音识别成功
- *         text:
- *           type: string
- *     SpeechChunkResponse:
- *       type: object
- *       properties:
- *         msg:
- *           type: string
- *         fileId:
- *           type: string
- *         chunkIndex:
- *           type: integer
- *         uploadedChunks:
- *           type: integer
- *         totalChunks:
- *           type: integer
- *         assembled:
- *           type: boolean
- *         fileReady:
- *           type: string
- *           nullable: true
- *     SpeechStreamEvent:
- *       type: object
- *       properties:
- *         type:
- *           type: string
- *           enum: [partial, done, error]
- *         text:
- *           type: string
- *         fileId:
- *           type: string
- *         msg:
- *           type: string
+ *         job:
+ *           type: object
+ *           properties:
+ *             jobId:
+ *               type: string
+ *             state:
+ *               type: string
+ *               enum: [waiting, active, completed, failed, delayed, paused]
+ *             progress:
+ *               type: number
+ *             text:
+ *               type: string
+ *             failedReason:
+ *               type: string
  */
 
 /**
@@ -431,10 +410,11 @@ export const aiDocs = {};
 
 /**
  * @swagger
- * /api/ai/speech-to-text:
+ * /api/ai/speech-to-text/jobs:
  *   post:
  *     tags: [AI]
- *     summary: 语音识别（基于本地 whisper.cpp）
+ *     summary: 创建异步语音识别任务
+ *     description: 将音频写入临时文件并投递到 BullMQ，客户端通过 jobId 查询识别状态。
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -449,88 +429,43 @@ export const aiDocs = {};
  *               audio:
  *                 type: string
  *                 format: binary
- *                 description: 音频文件（wav、mp3）
+ *                 description: 音频文件
+ *               lang:
+ *                 type: string
+ *                 default: zh
  *     responses:
- *       200:
- *         description: 识别成功
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SpeechToTextResponse'
+ *       202:
+ *         description: 任务已创建
  *       400:
  *         description: 未提供音频
  *       500:
- *         description: 识别失败
- */
-
-
-/**
- * @swagger
- * /api/ai/speech-upload/chunk:
- *   post:
- *     tags: [AI]
- *     summary: 上传音频分片（支持断点续传）
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - fileId
- *               - chunkIndex
- *               - totalChunks
- *               - chunk
- *             properties:
- *               fileId:
- *                 type: string
- *                 description: 客户端生成的文件唯一标识
- *               chunkIndex:
- *                 type: integer
- *                 description: 分片序号（从 0 开始）
- *               totalChunks:
- *                 type: integer
- *                 description: 分片总数
- *               chunk:
- *                 type: string
- *                 format: binary
- *                 description: 当前分片内容
- *     responses:
- *       200:
- *         description: 分片上传成功
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SpeechChunkResponse'
- *       400:
- *         description: 参数或分片文件错误
+ *         description: 创建任务失败
  */
 
 /**
  * @swagger
- * /api/ai/speech-to-text/stream/{fileId}:
+ * /api/ai/speech-to-text/jobs/{id}:
  *   get:
  *     tags: [AI]
- *     summary: 实时转写已上传的音频（SSE）
- *     description: 建立 SSE 连接，服务端会持续返回 partial/done 事件。
+ *     summary: 查询异步语音识别任务
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: fileId
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: 上传时使用的文件 ID
+ *         description: BullMQ jobId
  *     responses:
  *       200:
- *         description: text/event-stream，包含实时转写内容
+ *         description: 查询成功
  *         content:
- *           text/event-stream:
+ *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/SpeechStreamEvent'
+ *               $ref: '#/components/schemas/SpeechJobResponse'
+ *       403:
+ *         description: 无权限查询此任务
  *       404:
- *         description: 文件未找到
+ *         description: 任务不存在
  */

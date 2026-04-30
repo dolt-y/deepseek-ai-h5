@@ -3,8 +3,8 @@
 Project: H5 AI chat app with a Vue 3 frontend and an Express + SQLite backend.
 
 Repository layout
-- `wechat-ai-fontend`: Vite + Vue 3 H5 client
-- `wechat-ai-backend`: Node.js + Express API server
+- `ui`: Vite + Vue 3 H5 client
+- `backend`: Node.js + Express API server
 
 Quick commands
 Workspace (run at repo root)
@@ -13,17 +13,19 @@ Workspace (run at repo root)
 - `npm run dev:backend`
 - `npm run build:frontend`
 - `npm run preview:frontend`
+- `npm --prefix backend run worker:all`
 
-Frontend (run in `wechat-ai-fontend`)
+Frontend (run in `ui`)
 - `npm install`
 - `npm run dev` (dev server)
 - `npm run build` (production build)
 - `npm run preview` (preview build)
 
-Backend (run in `wechat-ai-backend`)
+Backend (run in `backend`)
 - `npm install`
 - `npm run dev` (nodemon)
 - `node index.js` (prod)
+- `npm run worker:all` (BullMQ workers)
 
 Environment configuration
 Backend `.env` (required)
@@ -34,25 +36,26 @@ Backend `.env` (required)
 - `DB_FILE=wechat-mini.db` (or absolute path)
 - `OPENAI_API_KEY=...`
 - `OPENAI_BASE_URL=...`
+- `REDIS_URL=redis://127.0.0.1:6379`
 
 Frontend Vite env (create `.env.development` or `.env.local`)
 - `VITE_OPENAI_BASE_URL=http://localhost:3000`
 
 Key files and ownership
 Frontend
-- `wechat-ai-fontend/src/utils/api.ts`: API paths + base URL
-- `wechat-ai-fontend/src/hook/*`: auth, streaming, scroll, recording logic
-- `wechat-ai-fontend/src/components/*`: chat UI components
-- `wechat-ai-fontend/src/style.scss`: global theme styles
+- `ui/src/utils/api.ts`: API paths + base URL
+- `ui/src/hook/*`: auth, streaming, scroll, recording logic
+- `ui/src/components/*`: chat UI components
+- `ui/src/style.scss`: global theme styles
 
 Backend
-- `wechat-ai-backend/index.js`: server bootstrap, route mounting
-- `wechat-ai-backend/routes/ai.js`: AI/chat routes
-- `wechat-ai-backend/routes/user.js`: auth/user routes
-- `wechat-ai-backend/controllers/*`: route handlers
-- `wechat-ai-backend/db.js`: SQLite schema + helpers
-- `wechat-ai-backend/swagger.js`: OpenAPI spec
-- `wechat-ai-backend/wechat-mini.db`: local SQLite database
+- `backend/index.js`: server bootstrap, route mounting
+- `backend/routes/ai.js`: AI/chat routes
+- `backend/routes/user.js`: auth/user routes
+- `backend/controllers/*`: route handlers
+- `backend/db.js`: SQLite schema + helpers
+- `backend/swagger.js`: OpenAPI spec
+- `backend/wechat-mini.db`: local SQLite database
 
 API surface (backend)
 - `POST /api/user/login`
@@ -66,7 +69,8 @@ API surface (backend)
 - `POST /api/ai/sessions/:id/delete`
 - `POST /api/ai/messages/:id/like`
 - `POST /api/ai/messages/:id/regenerate`
-- `POST /api/ai/speech-to-text`
+- `POST /api/ai/speech-to-text/jobs`
+- `GET /api/ai/speech-to-text/jobs/:id`
 - `GET /docs` and `GET /docs.json`
 
 Conventions
@@ -75,11 +79,11 @@ Conventions
 - Chat responses stream via SSE.
 
 Generated or large artifacts (avoid editing unless required)
-- `wechat-ai-fontend/dist`
-- `wechat-ai-fontend/build`
+- `ui/dist`
+- `ui/build`
 - `**/node_modules`
-- `wechat-ai-backend/temp`
-- `wechat-ai-backend/whisper.cpp`
+- `backend/temp`
+- `backend/whisper.cpp`
 
 Tests
 - No automated tests configured.
