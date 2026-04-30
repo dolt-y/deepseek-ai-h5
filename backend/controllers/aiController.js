@@ -1,6 +1,5 @@
 import {
   chat,
-  chatMock,
   getSessions,
   getSessionMessagesById,
   deleteSessionById,
@@ -58,34 +57,8 @@ export async function chatController(req, res) {
     const result = await chat({ openid, messages, model, stream: false, sessionId: clientSessionId });
     res.json({ sessionId: result.sessionId, reply: result.reply });
   } catch (err) {
-    sendError(res, err, 'AI服务调用失败');
+  sendError(res, err, 'AI服务调用失败');
   }
-}
-
-export async function chatMockController(req, res) {
-  const { stream, sessionId: clientSessionId } = req.body;
-
-  if (!stream) {
-    const result = await chatMock({ stream: false, sessionId: clientSessionId });
-    return res.json(result);
-  }
-
-  setupSSEResponse(res);
-  let isClientConnected = true;
-  req.on('close', () => { isClientConnected = false; });
-
-  const emit = async (evt) => {
-    if (!isClientConnected) return;
-    writeSSE(res, evt);
-  };
-
-  try {
-    const result = await chatMock({ stream: true, sessionId: clientSessionId, emit });
-    writeSSE(res, { type: 'done', sessionId: result.sessionId });
-  } catch (err) {
-    console.error('mock SSE 错误:', err);
-  }
-  res.end();
 }
 
 export async function getSessionsController(req, res) {
@@ -183,6 +156,7 @@ export async function createSpeechToTextJobController(req, res) {
       return res.status(400).json({ msg: '未提供音频文件或文件为空' });
     }
 
+    // HTTP 层只创建任务并返回 jobId；识别结果通过查询接口读取。
     const result = await createSpeechToTextJob({
       buffer: req.file.buffer,
       mimetype: req.file.mimetype,

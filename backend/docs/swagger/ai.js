@@ -199,38 +199,6 @@ export const aiDocs = {};
 
 /**
  * @swagger
- * /api/ai/chat-mock:
- *   post:
- *     tags: [AI]
- *     summary: Mock SSE 流，便于前端调试
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: false
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               stream:
- *                 type: boolean
- *                 default: true
- *               sessionId:
- *                 type: integer
- *     responses:
- *       200:
- *         description: 返回 mock 数据或开启 SSE
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ChatResponse'
- *           text/event-stream:
- *             schema:
- *               $ref: '#/components/schemas/StreamChunk'
- */
-
-/**
- * @swagger
  * /api/ai/sessions:
  *   get:
  *     tags: [Session]

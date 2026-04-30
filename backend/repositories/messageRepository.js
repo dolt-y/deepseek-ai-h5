@@ -65,14 +65,6 @@ export function getMessageLikeStatus(messageId) {
   );
 }
 
-// 获取消息内容（用于 mock）
-export function getMessageContentById(messageId) {
-  return dbGet(
-    `SELECT content FROM chat_records WHERE id = ?`,
-    [messageId]
-  );
-}
-
 // 更新点赞状态
 export function setMessageLikeStatus(messageId, liked) {
   return dbRun(

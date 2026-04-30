@@ -43,6 +43,7 @@ export async function cleanupGeneratedFiles({
   maxAgeMs = config.jobs.cleanup.maxAgeMs,
   now = Date.now()
 } = {}) {
+  // 只清理系统生成的上传目录和语音任务目录，不碰业务数据库和源码目录。
   const result = {
     checkedRoots: CLEANUP_ROOTS,
     deletedFiles: 0

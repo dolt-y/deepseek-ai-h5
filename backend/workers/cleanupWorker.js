@@ -1,10 +1,13 @@
 import { Worker } from 'bullmq';
 import { pathToFileURL } from 'url';
 import { createQueueConnection } from '../queues/redis.js';
-import { CLEANUP_QUEUE_NAME } from '../queues/names.js';
-import { scheduleCleanupUploadsJob } from '../queues/cleanupQueue.js';
+import {
+  CLEANUP_QUEUE_NAME,
+  scheduleCleanupUploadsJob
+} from '../queues/index.js';
 import { cleanupGeneratedFiles } from '../jobs/cleanupUploadsJob.js';
 
+// 清理 worker 负责注册并执行周期任务，避免上传图片和语音临时文件长期堆积。
 export const cleanupWorker = new Worker(
   CLEANUP_QUEUE_NAME,
   async (job) => {

@@ -38,7 +38,7 @@ backend/
 │   ├── rateLimit.js            # Redis 限流
 │   ├── upload.js               # 图片/音频上传处理
 │   └── whisper.js              # whisper.cpp CLI 封装
-├── queues/                    # Redis/BullMQ 队列封装
+├── queues/                    # Redis/BullMQ 连接、队列定义与任务投递
 ├── repositories/              # SQLite 数据访问层
 ├── routes/                    # 路由定义
 ├── services/                  # 业务编排层
@@ -51,6 +51,57 @@ backend/
 ├── swagger.js                 # Swagger 规范聚合
 └── wechat-mini.db             # 本地数据库文件
 ```
+
+## 后端分层与业务流
+
+### HTTP 请求分层
+
+```text
+routes
+  -> middleware(auth / rateLimit / upload)
+  -> controllers
+  -> services
+  -> repositories / clients / queues
+```
+
+- `routes`：描述接口路径和中间件顺序，不写业务规则。
+- `middleware`：处理鉴权、限流、上传等横切能力。
+- `controllers`：做 HTTP 入参转换和响应格式，不直接操作数据库或 Redis。
+- `services`：承载业务编排，例如创建会话、写消息、创建语音任务。
+- `repositories`：只封装 SQLite 读写。
+- `queues`：只封装 Redis/BullMQ 队列，不执行具体业务。
+- `workers`：后台消费队列，执行耗时任务。
+
+### 异步语音识别链路
+
+```text
+前端上传音频
+  -> POST /api/ai/speech-to-text/jobs
+  -> authMiddleware 校验用户
+  -> speechRateLimit 使用 Redis 限流
+  -> upload.single('audio') 读取音频
+  -> createSpeechToTextJob 写入 temp/speech-jobs
+  -> BullMQ speech-transcription 队列记录 job
+  -> speechWorker 调用 whisper.cpp 转写
+  -> GET /api/ai/speech-to-text/jobs/:id 查询结果
+```
+
+设计约定：
+
+- 音频二进制只写入本地临时文件，不塞进 Redis。
+- Redis 保存任务状态、进度、失败原因和最终文本。
+- 查询任务时会校验 `openid`，避免用户读取他人的识别结果。
+- worker 完成或失败后都会尝试删除临时音频文件。
+
+### 限流策略
+
+当前限流使用固定时间窗口：
+
+```text
+rate:{业务前缀}:{用户或IP}:{窗口编号}
+```
+
+每次请求通过 Redis `INCR` 原子递增计数，第一次写入时设置过期时间。超过配置阈值返回 `429`。Redis 短暂不可用时限流降级放行，避免限流组件故障导致核心接口整体不可用。
 
 ## 运行要求
 
@@ -187,7 +238,6 @@ http://localhost:3000/docs.json
 | 方法 | 路径 | 鉴权 | 说明 |
 | --- | --- | --- | --- |
 | `POST` | `/api/ai/chat` | 是 | 正式聊天接口，支持 JSON 和图片上传 |
-| `POST` | `/api/ai/chat-mock` | 是 | Mock SSE，便于前端联调 |
 | `GET` | `/api/ai/sessions` | 是 | 获取当前用户会话列表 |
 | `GET` | `/api/ai/sessions/:id/messages` | 是 | 获取会话消息 |
 | `POST` | `/api/ai/sessions/:id/delete` | 是 | 删除会话及其消息 |

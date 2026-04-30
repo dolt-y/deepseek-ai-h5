@@ -63,7 +63,6 @@ API surface (backend)
 - `GET /api/user/info`
 - `POST /api/user/refresh`
 - `POST /api/ai/chat` (SSE stream, JWT required)
-- `POST /api/ai/chat-mock`
 - `GET /api/ai/sessions`
 - `GET /api/ai/sessions/:id/messages`
 - `POST /api/ai/sessions/:id/delete`

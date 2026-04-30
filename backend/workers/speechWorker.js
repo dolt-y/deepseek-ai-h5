@@ -2,9 +2,11 @@ import { Worker } from 'bullmq';
 import fs from 'fs/promises';
 import { pathToFileURL } from 'url';
 import { createQueueConnection } from '../queues/redis.js';
-import { SPEECH_QUEUE_NAME } from '../queues/names.js';
+import { SPEECH_QUEUE_NAME } from '../queues/index.js';
 import { transcribeSpeech } from '../services/speechService.js';
 
+// 语音 worker 是后台消费者：从 Redis 队列取任务，调用 whisper.cpp 转写，
+// 最后把识别文本作为 job returnvalue 存回 BullMQ，供查询接口读取。
 export const speechWorker = new Worker(
   SPEECH_QUEUE_NAME,
   async (job) => {
@@ -23,6 +25,7 @@ export const speechWorker = new Worker(
       await job.updateProgress(100);
       return { text };
     } finally {
+      // 音频文件只为本次转写临时存在，成功或失败后都应释放磁盘空间。
       await fs.unlink(filePath).catch(() => {});
     }
   },

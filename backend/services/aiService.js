@@ -12,7 +12,6 @@ import {
   getSessionMessages,
   deleteMessagesBySession,
   getMessageLikeStatus,
-  getMessageContentById,
   setMessageLikeStatus,
   getMessageWithSessionOwner,
 } from '../repositories/messageRepository.js';
@@ -106,62 +105,6 @@ export async function chat({
   );
 
   return { sessionId: currentSessionId, reply };
-}
-
-export async function chatMock({ stream, sessionId, emit }) {
-  const currentSessionId = sessionId || Date.now();
-
-  if (!stream) {
-    return {
-      sessionId: currentSessionId,
-      reply: {
-        role: 'assistant',
-        content: '这是 mock 的非流式回复，用于 UI 测试。',
-      },
-    };
-  }
-
-  const mockRow = await getMessageContentById(100).catch(() => null);
-  const mockText =
-    mockRow && mockRow.content
-      ? mockRow.content
-      : '这是 mock 的非流式回复，用于 UI 测试。';
-  const chunks = mockText.match(/.{3,8}/g) || [];
-
-  async function* mockCompletion() {
-    for (const chunk of chunks) {
-      yield { choices: [{ delta: { content: chunk } }] };
-      await new Promise((r) => setTimeout(r, 40 + Math.random() * 80));
-    }
-  }
-
-  try {
-    await handleBufferedStreamResponse(
-      mockCompletion(),
-      async (evt) => {
-        if (!emit) return;
-        if (evt && evt.type === 'delta') {
-          await emit({ type: 'delta', text: evt.text });
-        } else if (evt && evt.type === 'thinking') {
-          await emit({ type: 'thinking', thinking: evt.thinking });
-        }
-      },
-      { minChars: 60, maxWait: 180 }
-    );
-  } catch (err) {
-    console.error('mock buffered SSE 错误:', err);
-    try {
-      for (const c of chunks) {
-        if (!emit) break;
-        await emit({ type: 'delta', text: c });
-        await new Promise((r) => setTimeout(r, 40 + Math.random() * 80));
-      }
-    } catch (err2) {
-      console.error('mock fallback SSE 错误:', err2);
-    }
-  }
-
-  return { sessionId: currentSessionId, streamed: true };
 }
 
 export function getSessions(openid) {
