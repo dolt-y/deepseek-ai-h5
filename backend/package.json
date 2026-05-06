@@ -12,7 +12,7 @@
     "worker:cleanup": "node workers/cleanupWorker.js",
     "worker:all": "node workers/index.js"
   },
-  "author": "",
+  "author": "wen.yao",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.13.2",

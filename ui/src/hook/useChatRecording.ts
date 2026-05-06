@@ -1,5 +1,6 @@
 // src/hooks/chat/useChatRecording.ts
 import { ref } from 'vue';
+import { ElMessage } from 'element-plus';
 import NativeRecorder from '@/utils/NativeRecorder';
 import { get, post } from '@/utils/request';
 import api from '@/utils/api';
@@ -82,6 +83,7 @@ export function useChatRecording(options: RecordingOptions = {}) {
       return text;
     } catch (error) {
       console.error('语音识别失败:', error);
+      ElMessage.error(error instanceof Error ? error.message : '语音识别失败');
       return '';
     } finally {
       isTranscribing.value = false;
@@ -96,9 +98,11 @@ export function useChatRecording(options: RecordingOptions = {}) {
 
     formData.append('audio', wavBlob, 'audio.wav');
     const result = await post<SpeechJobCreateResponse>(api.recording, formData);
+    let lastState = 'unknown';
 
     for (let i = 0; i < SPEECH_JOB_MAX_ATTEMPTS; i++) {
       const status = await get<SpeechJobQueryResponse>(api.recordingJob(result.jobId));
+      lastState = status.job.state || lastState;
 
       if (status.job.state === 'completed') {
         return status.job.text || '';
@@ -111,7 +115,11 @@ export function useChatRecording(options: RecordingOptions = {}) {
       await sleep(SPEECH_JOB_POLL_INTERVAL);
     }
 
-    throw new Error('语音识别任务超时');
+    if (lastState === 'waiting' || lastState === 'delayed' || lastState === 'paused') {
+      throw new Error(`语音识别任务仍在排队，请确认后台 worker 已启动（最后状态：${lastState}）`);
+    }
+
+    throw new Error(`语音识别任务超时（最后状态：${lastState}）`);
   }
 
   return {

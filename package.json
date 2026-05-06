@@ -24,7 +24,8 @@
   "scripts": {
     "dev:frontend": "npm --workspace ui run dev",
     "dev:backend": "npm --workspace backend run dev",
-    "dev:all": "npm run dev:backend & npm run dev:frontend",
+    "dev:worker": "npm --workspace backend run worker:all",
+    "dev:all": "npm run dev:backend & npm run dev:worker & npm run dev:frontend",
     "build:frontend": "npm --workspace ui run build",
     "build:frontend:zip": "rm -f dist.zip && cd ui && npm run build && cd dist && zip -rq ../../dist.zip .",
     "preview:frontend": "npm --workspace ui run preview",
