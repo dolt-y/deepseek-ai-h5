@@ -1,0 +1,69 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_OPENAI_BASE_URL: ""
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    env_file:
+      - docker.env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      DB_FILE: /app/data/wechat-mini.db
+      REDIS_URL: redis://redis:6379
+    volumes:
+      - backend_data:/app/data
+      - backend_uploads:/app/uploads
+      - backend_temp:/app/temp
+    depends_on:
+      - redis
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    profiles:
+      - worker
+    command: ["npm", "run", "worker:all"]
+    env_file:
+      - docker.env
+    environment:
+      NODE_ENV: production
+      DB_FILE: /app/data/wechat-mini.db
+      REDIS_URL: redis://redis:6379
+      WHISPER_ROOT: /app/whisper.cpp
+    volumes:
+      - backend_data:/app/data
+      - backend_uploads:/app/uploads
+      - backend_temp:/app/temp
+      # Enable speech-to-text by mounting a prepared whisper.cpp directory:
+      # - ./backend/whisper.cpp:/app/whisper.cpp:ro
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+volumes:
+  backend_data:
+  backend_uploads:
+  backend_temp:
+  redis_data:
