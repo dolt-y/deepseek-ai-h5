@@ -54,6 +54,12 @@
 │   ├── workers/                # BullMQ worker 入口
 │   ├── db.js                   # SQLite 初始化
 │   └── index.js                # 服务入口
+├── Dockerfile.frontend         # 前端生产镜像
+├── Dockerfile.backend          # 后端生产镜像
+├── docker-compose.yml          # Docker Compose 单机部署编排
+├── docker.env.example          # Docker 部署环境变量模板
+├── nginx.conf                  # 前端容器 Nginx 配置
+├── DEPLOYMENT.md               # Docker 部署详细文档
 ├── AGENTS.md                   # 协作与运行约定
 └── package.json                # monorepo 脚本
 ```
@@ -377,6 +383,137 @@ make -j4
 
 如放在其他目录，需要显式配置 `WHISPER_ROOT`。
 
+## Docker Compose 部署
+
+当前项目支持 Docker Compose 单机容器化部署，适合直接部署到 Linux 云服务器。
+
+部署后主要包含三个容器：
+
+```text
+frontend  # Nginx + 前端静态文件 + /api 反向代理
+backend   # Express API 服务，容器内部监听 3000
+redis     # Redis，用于限流和 BullMQ
+```
+
+可选 worker：
+
+```text
+worker    # BullMQ 后台任务，处理语音转文字和清理任务
+```
+
+生产访问链路：
+
+```text
+浏览器
+  -> 服务器公网 8080 端口
+  -> frontend 容器 Nginx:80
+  -> /api 转发到 backend 容器:3000
+  -> backend 访问 redis:6379 和 SQLite volume
+```
+
+默认只有 `8080` 暴露给公网，后端 `3000` 和 Redis `6379` 只在 Docker 内部网络访问。
+
+### 1. 准备服务器
+
+服务器需要安装：
+
+- Git
+- Docker
+- Docker Compose v2
+
+Ubuntu 示例：
+
+```bash
+sudo apt update
+sudo apt install -y git docker.io docker-compose-v2
+docker compose version
+```
+
+### 2. 配置环境变量
+
+在项目根目录复制 Docker 环境变量模板：
+
+```bash
+cp docker.env.example docker.env
+nano docker.env
+```
+
+至少需要配置：
+
+```env
+JWT_SECRET=换成一串足够长的随机字符串
+OPENAI_API_KEY=你的AI接口KEY
+OPENAI_BASE_URL=你的AI接口BaseURL
+WX_APP_ID=你的微信APPID
+WX_APP_SECRET=你的微信密钥
+SWAGGER_SERVER_URL=http://你的服务器IP:8080
+CORS_ORIGIN=*
+```
+
+以下变量由 `docker-compose.yml` 注入，通常不需要写进 `docker.env`：
+
+```env
+NODE_ENV=production
+HOST=0.0.0.0
+PORT=3000
+DB_FILE=/app/data/wechat-mini.db
+REDIS_URL=redis://redis:6379
+```
+
+前端 Docker 生产部署下 `VITE_OPENAI_BASE_URL` 默认为空，表示前端请求同域 `/api`，再由 Nginx 转发到后端。
+
+### 3. 构建并启动
+
+```bash
+docker compose up -d --build
+```
+
+检查容器：
+
+```bash
+docker compose ps
+```
+
+查看日志：
+
+```bash
+docker compose logs --tail=100 backend
+docker compose logs --tail=100 frontend
+```
+
+访问地址：
+
+- 前端：`http://服务器IP:8080`
+- Swagger：`http://服务器IP:8080/docs`
+- OpenAPI JSON：`http://服务器IP:8080/docs.json`
+
+如果浏览器无法访问，需要在云服务器安全组或防火墙中放行 `8080` 端口。
+
+### 4. 启动 worker
+
+如需启用语音转文字和后台清理任务：
+
+```bash
+docker compose --profile worker up -d --build
+```
+
+### 5. 更新部署
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+SQLite 数据、上传文件和 Redis 数据保存在 Docker volume 中。不要随意执行：
+
+```bash
+docker compose down -v
+```
+
+该命令会删除 volume，可能导致数据库和上传文件丢失。
+
+更完整的 Docker 部署步骤、端口说明、国内服务器构建慢处理和排障说明见 [DEPLOYMENT.md](./DEPLOYMENT.md)。
+
 ## 部署要点
 
 - 前端生产构建产物在 `ui/dist`。
@@ -411,4 +548,3 @@ location /uploads/ {
     proxy_set_header Host $host;
 }
 ```
-
