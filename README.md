@@ -1,4 +1,4 @@
-# AI 智能助手
+# AI 智能助手（deepseek-V4）
 
 线上地址：[http://150.158.150.46:8080](http://150.158.150.46:8080)
 
@@ -412,10 +412,3 @@ location /uploads/ {
 }
 ```
 
-## 已知限制
-
-- 当前没有自动化测试和 CI。
-- 数据库 schema 通过启动时建表与 `ALTER TABLE` 维护，没有独立迁移工具。
-- `/api/ai/models` 依赖上游模型服务的 `models.list()` 能力。
-- H5 默认登录账号仅适合本地调试，不适合直接作为正式生产登录方案。
-- 语音识别依赖 Redis、BullMQ worker 与本地 `whisper.cpp` 环境。
