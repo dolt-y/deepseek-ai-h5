@@ -94,17 +94,50 @@ const previewContent = ref('');
 
 const emit = defineEmits(['preview-image', 'regenerate', 'quote', 'share', 'like']);
 
-function handleCopy() {
-  const text = document.getElementById(`message-${props.message.id}`)?.querySelector('.message-content')?.textContent;
-  if (!text) return;
+async function copyText(text: string) {
+  if (!text) return false;
+
+  try {
+    if (window.isSecureContext && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (error) {
+    console.warn('Clipboard API copy failed, using fallback.', error);
+  }
 
   const textarea = document.createElement('textarea');
   textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.left = '-9999px';
+  textarea.style.top = '0';
+  textarea.style.opacity = '0';
   document.body.appendChild(textarea);
 
+  textarea.focus();
   textarea.select();
-  document.execCommand('copy');
-  document.body.removeChild(textarea);
+  textarea.setSelectionRange(0, textarea.value.length);
+
+  try {
+    return document.execCommand('copy');
+  } catch (error) {
+    console.warn('Fallback copy failed.', error);
+    return false;
+  } finally {
+    document.body.removeChild(textarea);
+  }
+}
+
+async function handleCopy() {
+  const text = document.getElementById(`message-${props.message.id}`)?.querySelector('.message-content')?.textContent;
+  if (!text) return;
+
+  const copied = await copyText(text);
+  if (!copied) {
+    ElMessage.error('复制失败，请手动选择复制');
+    return;
+  }
 
   if (isCopied) {
     isCopied.value = true;
@@ -119,7 +152,7 @@ function addCodeButtons() {
     const pres = messageEl.querySelectorAll('pre');
 
     pres.forEach((pre) => {
-      // if (pre.parentElement?.querySelector('.copy-code-btn')) return;
+      if (pre.parentElement?.querySelector('.copy-code-btn')) return;
 
       // 包裹 pre
       const wrapper = document.createElement('div');
@@ -139,11 +172,14 @@ function addCodeButtons() {
       const copyBtn = document.createElement('button');
       copyBtn.className = 'copy-code-btn';
       copyBtn.textContent = '复制';
-      copyBtn.onclick = () => {
+      copyBtn.onclick = async () => {
         if (!codeEl) return;
-        navigator.clipboard.writeText(codeEl.textContent || '').then(() => {
+        const copied = await copyText(codeEl.textContent || '');
+        if (copied) {
           ElMessage.success('复制成功');
-        });
+        } else {
+          ElMessage.error('复制失败，请手动选择复制');
+        }
       };
       Object.assign(copyBtn.style, {
         position: 'absolute',
